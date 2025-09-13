@@ -1,11 +1,24 @@
 import { StyleSheet } from "react-native";
 
 import React, { useState } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
-
+import {
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
+} from "react-native";
 // The main App component that renders the calendar.
 export default function Calendar() {
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [text, setText] = useState<string>("");
+
+  const onChangeText = (text: string) => {
+    setText(text);
+  };
 
   // Function to get the number of days in a specific month and year.
   const getDaysInMonth = (year: number, month: number) => {
@@ -134,10 +147,31 @@ export default function Calendar() {
           ))}
         </View>
         <View style={styles.calendarGrid}>{renderCalendarDays()}</View>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={styles.inputContainer}
+        >
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={styles.inner}>
+              <TextInput
+                onChangeText={onChangeText}
+                value={text}
+                placeholder="Input Anything"
+                placeholderTextColor="#1b9bf0"
+                returnKeyType="send"
+                style={styles.textInput}
+              />
+            </View>
+          </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
       </View>
-      <View>
-        <Text style={styles.input}>Input Text</Text>
-      </View>
+
+      {/* <View style={styles.inputContainer}>
+        <TextInput 
+        // onSubmitEditing={addTodo}
+        // returnKeyType="Submit"
+        >Input Text</TextInput>
+      </View> */}
     </View>
   );
 }
@@ -152,10 +186,15 @@ const styles = StyleSheet.create({
     // 이 둘중 하나가 tab이랑 캘린더 위치 관계  조정하는 역할인듯
     // 왠지 이 둘 중 하나 빼고 flex 비율 조정하면 의도한 대로 될듯
     alignItems: "center",
-    justifyContent: "center",
+    // justifyContent: "center",
+    // 5주, 6주가 다르기 때문에 justifyContent를 삭제하고
+    // padding 기준으로 styles.card을 아래로 밀어줌
+    paddingTop: 71,
     // padding: 16,
   },
   card: {
+    // flex: 9,
+
     backgroundColor: "white",
     // borderRadius: 24,
     // shadowColor: "#000",
@@ -164,7 +203,8 @@ const styles = StyleSheet.create({
     // shadowRadius: 10,
     // elevation: 8,
 
-    padding: 24,
+    paddingVertical: 24,
+    paddingHorizontal: 6,
     width: "100%",
     maxWidth: 600,
   },
@@ -205,6 +245,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 8,
     //marginVertical: 10,
+
+    //added
+    width: "14.28%",
   },
   dayNameText: {
     fontSize: 12,
@@ -219,7 +262,9 @@ const styles = StyleSheet.create({
   },
   dayCell: {
     width: "14.28%", // 100% / 7 days
-    aspectRatio: 1, // To make the cells square
+
+    // 이걸 줘서 최하단에 예상하지 않은 추가 공백이 생김
+    // aspectRatio: 1, // To make the cells square
     justifyContent: "center",
     alignItems: "center",
     padding: 8,
@@ -227,7 +272,8 @@ const styles = StyleSheet.create({
 
     // added
     // 여기가 각 날짜의 세로 간격 벌리는 곳
-    marginVertical: 20,
+    // marginVertical: 20,
+    marginBottom: 49.5,
   },
   dayText: {
     fontSize: 16,
@@ -242,20 +288,56 @@ const styles = StyleSheet.create({
   },
   dayCellInactive: {
     width: "14.28%",
-    aspectRatio: 1,
+    // aspectRatio: 1,
     justifyContent: "center",
     alignItems: "center",
     padding: 8,
 
     // added
-    marginVertical: 10,
+    // marginVertical: 20,
+    marginBottom: 49.5,
   },
   dayTextInactive: {
     fontSize: 16,
     fontWeight: "500",
     color: "#9ca3af",
   },
-  input: {
-    marginTop: 100,
+  inner: {
+    padding: 24,
+    // flex: 1,
+    justifyContent: "space-around",
+  },
+  textInput: {
+    // height: 40,
+    // borderColor: "#000000",
+    // borderBottomWidth: 1,
+    // marginBottom: 36,
+    backgroundColor: "#888",
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    borderRadius: 30,
+    // marginTop: 20,
+    // marginVertical: 20,
+    fontSize: 18,
+  },
+  // btnContainer: {
+  //   backgroundColor: "white",
+  //   marginTop: 12,
+  // },
+  // input: {
+  //   backgroundColor: "#888",
+  //   paddingVertical: 15,
+  //   paddingHorizontal: 20,
+  //   borderRadius: 30,
+  //   marginTop: 20,
+  //   marginVertical: 20,
+  //   fontSize: 18,
+  // },
+  // inputContainer: {
+  //   // flex: 1,
+  //   backgroundColor: "#1b9bf0",
+  // },
+  inputContainer: {
+    backgroundColor: "#1b9bf0",
   },
 });

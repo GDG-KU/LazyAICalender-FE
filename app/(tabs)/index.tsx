@@ -1,10 +1,12 @@
-import { StyleSheet } from "react-native";
-
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
+  Animated,
+  Dimensions,
   Keyboard,
   KeyboardAvoidingView,
+  KeyboardEvent,
   Platform,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
@@ -15,6 +17,10 @@ import {
 export default function Calendar() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [text, setText] = useState<string>("");
+  const [isInputFocused, setIsInputFocused] = useState<boolean>(false);
+
+  // 애니메이션 값 (0은 초기 위치, 1은 중앙 위치)
+  const animatedValue = useRef(new Animated.Value(0)).current;
 
   const onChangeText = (text: string) => {
     setText(text);
@@ -119,6 +125,87 @@ export default function Calendar() {
   ];
   const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
+  const useKeyboard = () => {
+    // const [keyboardHeight, setKeyboardHeight] = useState(0);
+    let height = 0;
+    function onKeyboardDidShow(e: KeyboardEvent) {
+      // setKeyboardHeight(e.endCoordinates.height);
+      height = e.endCoordinates.height;
+    }
+    function onKeyboardDidHide() {
+      // setKeyboardHeight(0);
+    }
+
+    useEffect(() => {
+      const keyboardDidShowListener = Keyboard.addListener(
+        "keyboardDidShow",
+        onKeyboardDidShow
+      );
+      const keyboardDidHideListener = Keyboard.addListener(
+        "keyboardDidHide",
+        onKeyboardDidHide
+      );
+
+      return () => {
+        keyboardDidShowListener.remove();
+        keyboardDidHideListener.remove();
+      };
+    }, []);
+
+    // return keyboardHeight;
+    return height;
+  };
+
+  // 애니메이션 효과
+  const onHandleFocus = () => {
+    // 입력창이 포커스되면 애니메이션 시작
+    setIsInputFocused(true);
+    Animated.timing(animatedValue, {
+      toValue: 1, // 목표 값
+      duration: 180, // 애니메이션 시간
+      useNativeDriver: true, // 네이티브 드라이버 사용
+    }).start();
+  };
+
+  const onHandleBlur = () => {
+    // 입력창이 블러되면 애니메이션 역방향으로 시작
+    setIsInputFocused(false);
+    Animated.timing(animatedValue, {
+      toValue: 0, // 목표 값
+      duration: 180, // 애니메이션 시간
+      useNativeDriver: true, // 네이티브 드라이버 사용
+    }).start();
+  };
+
+  const addSchedule = () => {};
+
+  // 애니메이션 값에 따라 Y축 위치 계산
+  // const inputTranslateY =
+  //   (Dimensions.get("window").height + useKeyboard()) / 2 - 68;
+  // console.log("keyboard", useKeyboard());
+  // console.log("height", Dimensions.get("window").height);
+  // console.log("translate", inputTranslateY);
+  const translateY = animatedValue.interpolate({
+    inputRange: [0, 1],
+    // outputRange: [0, -207], // 필요에 따라 이 값을 조절
+    // outputRange: [0, -inputTranslateY], // 207이 되어야 하는게 맞는데 왜 값이 다르지?
+    outputRange: [
+      0,
+      -((Dimensions.get("window").height + useKeyboard()) / 2 - 68),
+    ],
+
+    // useKeyboard() 하면 keyboard의 높이를 가져온다.
+    // 디스플레이의 세로 높이: Dimensions.get('window').height;
+
+    // styles.inputContainer.bottom: 20
+    // textInput의 bottom 기준 현재 몇px이나 위로 떨어져있는지
+    // inner에 padding이 24 있음,
+    // textInput의 paddingVertial 15, 폰트 사이즈 18px -> 절반인 약 9픽셀
+
+    // 세로 높이: 97
+    // -> 97/2 +. 0
+  });
+
   return (
     <View style={styles.container}>
       <View style={styles.card}>
@@ -147,7 +234,35 @@ export default function Calendar() {
           ))}
         </View>
         <View style={styles.calendarGrid}>{renderCalendarDays()}</View>
-        <KeyboardAvoidingView
+        {/* <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={[
+            styles.inputContainer,
+            // isInputFocused && {
+            //   position: "absolute",
+            //   bottom: 0,
+            //   width: "100%",
+            // },
+          ]}
+        >
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <Animated.View
+              style={[styles.inner, { transform: [{ translateY }] }]}
+            >
+              <TextInput
+                onChangeText={onChangeText}
+                value={text}
+                placeholder="Input Anything"
+                placeholderTextColor="#1b9bf0"
+                returnKeyType="send"
+                style={styles.textInput}
+                onFocus={onHandleFocus} // 포커스 시 애니메이션 실행
+                onBlur={onHandleBlur} // 블러 시 애니메이션 역방향 실행
+              />
+            </Animated.View>
+          </TouchableWithoutFeedback>
+        </KeyboardAvoidingView> */}
+        {/* <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           style={styles.inputContainer}
         >
@@ -163,13 +278,34 @@ export default function Calendar() {
               />
             </View>
           </TouchableWithoutFeedback>
-        </KeyboardAvoidingView>
+        </KeyboardAvoidingView> */}
       </View>
-
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.inputContainer}
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          {/* <Animated.View */}
+          {/* <View style={[styles.inner, { transform: [{ translateY }] }]}> */}
+          <View style={styles.inner}>
+            <TextInput
+              onChangeText={onChangeText}
+              value={text}
+              placeholder="Input Anything"
+              placeholderTextColor="#1b9bf0"
+              returnKeyType="send"
+              style={styles.textInput}
+              onFocus={onHandleFocus} // 포커스 시 애니메이션 실행
+              onBlur={onHandleBlur} // 블러 시 애니메이션 역방향 실행
+              onSubmitEditing={addSchedule}
+            />
+            {/* </Animated.View> */}
+          </View>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
       {/* <View style={styles.inputContainer}>
         <TextInput 
         // onSubmitEditing={addTodo}
-        // returnKeyType="Submit"
         >Input Text</TextInput>
       </View> */}
     </View>
@@ -339,5 +475,12 @@ const styles = StyleSheet.create({
   // },
   inputContainer: {
     backgroundColor: "#1b9bf0",
+    position: "absolute", // 뷰포트를 기준으로 위치를 고정
+    bottom: 20, // 화면 하단에 위치
+    width: "90%", // 너비를 전체로 설정
+    alignSelf: "center",
+    // // left: 0,
+    // // right: 0,
+    // paddingHorizontal: 20,
   },
 });

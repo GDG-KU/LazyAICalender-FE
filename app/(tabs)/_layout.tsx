@@ -22,7 +22,7 @@ export default function TabLayout() {
         options={{
           title: "Calendar",
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="house.fill" color={color} />
+            <IconSymbol size={28} name="calendar" color={color} />
           ),
         }}
       />
@@ -40,7 +40,7 @@ export default function TabLayout() {
         options={{
           title: "Time Tracker",
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="checklist.checked" color={color} />
+            <IconSymbol size={24} name="clock" color={color} />
           ),
         }}
       />

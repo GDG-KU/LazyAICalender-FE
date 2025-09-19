@@ -21,7 +21,9 @@ const MAPPING = {
   "paperplane.fill": "send",
   "chevron.left.forwardslash.chevron.right": "code",
   "chevron.right": "chevron-right",
+  calendar: "calendar-month",
   "checklist.checked": "checklist",
+  clock: "access-time",
 } as IconMapping;
 
 /**

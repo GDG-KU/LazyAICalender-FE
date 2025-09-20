@@ -1,19 +1,26 @@
 import QueryInput from "@/components/todo-query-input";
 
-import { StatusBar } from "expo-status-bar";
 import React, { useRef, useState } from "react";
 import {
   Dimensions,
   FlatList,
+  LayoutChangeEvent,
   StyleSheet,
   Text,
   View,
   ViewToken,
 } from "react-native";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaProvider,
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
 // 화면 너비 계산
 const screenWidth = Dimensions.get("window").width;
+const screenHeight = Dimensions.get("window").height;
+// console.log(screenHeight);
+// 스크린 전체 높이 896
 
 // 월 및 요일 이름
 const monthNames = [
@@ -39,6 +46,16 @@ const INITIAL_INDEX = 1000;
 // 달력 컴포넌트
 export default function Calendar() {
   const [currentMonthIndex, setCurrentMonthIndex] = useState(INITIAL_INDEX);
+  const insets = useSafeAreaInsets();
+  //const usableHeight = screenHeight - insets.top - insets.bottom;
+  const safeAreaHeight = insets.top;
+  // console.log("실제 렌더링 가능한 높이:", usableHeight, insets.top);
+
+  const handleLayout = (event: LayoutChangeEvent) => {
+    const { height } = event.nativeEvent.layout;
+    // setContainerHeight(height);
+    console.log("Container height:", height);
+  };
 
   const baseDate = new Date();
 
@@ -74,7 +91,13 @@ export default function Calendar() {
     // 이전 달 날짜
     for (let i = firstDay; i > 0; i--) {
       days.push(
-        <View key={`prev-${i}`} style={styles.dayCell}>
+        <View
+          key={`prev-${i}`}
+          style={[
+            styles.dayCell,
+            { height: (screenHeight - 83 - 240.5 - safeAreaHeight) / 6 },
+          ]}
+        >
           <Text style={styles.dayTextInactive}>{daysInPrevMonth - i + 1}</Text>
         </View>
       );
@@ -91,9 +114,30 @@ export default function Calendar() {
       days.push(
         <View
           key={`current-${i}`}
-          style={[styles.dayCell, isToday && styles.todayCell]}
+          style={[
+            styles.dayCell,
+            { height: (screenHeight - 83 - 240.5 - safeAreaHeight) / 6 },
+            ////          896.     하단 tab 기타 값   노치
+            isToday && styles.todayCell,
+          ]}
         >
           <Text style={[styles.dayText, isToday && styles.todayText]}>{i}</Text>
+
+          <View style={styles.todoContainer}>
+            <Text key={1} style={styles.todoText}>
+              todos
+            </Text>
+
+            <Text key={2} style={styles.todoText}>
+              todos
+            </Text>
+            <Text key={3} style={styles.todoText}>
+              todos
+            </Text>
+            <Text key={4} style={styles.todoText}>
+              todos
+            </Text>
+          </View>
         </View>
       );
     }
@@ -103,7 +147,13 @@ export default function Calendar() {
       const trailingDays = 6 - lastDay;
       for (let i = 1; i <= trailingDays; i++) {
         days.push(
-          <View key={`next-${i}`} style={styles.dayCell}>
+          <View
+            key={`next-${i}`}
+            style={[
+              styles.dayCell,
+              { height: (screenHeight - 83 - 240.5 - safeAreaHeight) / 6 },
+            ]}
+          >
             <Text style={styles.dayTextInactive}>{i}</Text>
           </View>
         );
@@ -113,10 +163,24 @@ export default function Calendar() {
     return (
       <View style={styles.card}>
         <View style={styles.header}>
+          {/* <TouchableOpacity
+            onPress={handlePrevious}
+            style={styles.navButton}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} // Optional: Increases the tappable area
+          >
+            <Text style={styles.navText}>{"<"}</Text>
+          </TouchableOpacity> */}
           <View style={styles.monthYearContainer}>
             <Text style={styles.monthText}>{monthNames[month]}</Text>
             <Text style={styles.yearText}>{year}</Text>
           </View>
+          {/* <TouchableOpacity
+            onPress={handleNext}
+            style={styles.navButton}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <Text style={styles.navText}>{">"}</Text>
+          </TouchableOpacity> */}
         </View>
 
         <View style={styles.dayNameContainer}>
@@ -144,9 +208,7 @@ export default function Calendar() {
 
   return (
     <SafeAreaProvider>
-      <SafeAreaView style={styles.container}>
-        <StatusBar style="dark" />
-
+      <SafeAreaView style={styles.container} onLayout={handleLayout}>
         {/* 월별 스크롤 가능한 달력 */}
         <FlatList
           data={Array.from({ length: 2000 })}
@@ -170,7 +232,6 @@ export default function Calendar() {
           }}
         />
 
-        {/* 할 일 입력 */}
         <QueryInput />
       </SafeAreaView>
     </SafeAreaProvider>
@@ -180,11 +241,26 @@ export default function Calendar() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    // 완전히 white로 하면 background가 안 보임
     backgroundColor: "#888",
     alignItems: "center",
+    // justifyContent: "center",
+    // 5주, 6주에 따른 높이가 다르기 때문에
+    // calendarGrid를 세로 중앙 정렬시키는 justifyContent를 삭제하고
+    // padding??으로 styles.card을 아래로 밀어줌
+    // paddingTop으로 밀어주면 StatusBar를 가림
+    // paddingTop: 30,
+    // marginTop: 50,
   },
   card: {
-    backgroundColor: "white",
+    backgroundColor: "#000",
+    // borderRadius: 24,
+    // shadowColor: "#000",
+    // shadowOffset: { width: 0, height: 4 },
+    // shadowOpacity: 0.1,
+    // shadowRadius: 10,
+    // elevation: 8,
+
     paddingVertical: 24,
     paddingHorizontal: 6,
     width: screenWidth,
@@ -196,18 +272,26 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 24,
   },
+  navButton: {
+    padding: 8,
+    borderRadius: 9999, // A large value for a circle
+  },
+  navText: {
+    fontSize: 24,
+    color: "#4b5563",
+  },
   monthYearContainer: {
     alignItems: "center",
   },
   monthText: {
     fontSize: 28,
     fontWeight: "800",
-    color: "#111827",
+    color: "#fff",
   },
   yearText: {
     fontSize: 18,
     fontWeight: "500",
-    color: "#6b7280",
+    color: "#fff",
     marginTop: 4,
   },
   dayNameContainer: {
@@ -215,14 +299,18 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   dayNameCell: {
+    // flex: 1,
     alignItems: "center",
     padding: 8,
+    //marginVertical: 10,
+
+    //added
     width: "14.28%",
   },
   dayNameText: {
     fontSize: 12,
     fontWeight: "600",
-    color: "#6b7280",
+    color: "#fff",
     textTransform: "uppercase",
   },
   calendarGrid: {
@@ -231,20 +319,27 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   dayCell: {
-    width: "14.28%",
-    justifyContent: "center",
+    width: "14.28%", // 100% / 7 days
+
+    // 이걸 줘서 최하단에 예상하지 않은 추가 공백이 생김
+    // aspectRatio: 1, // To make the cells square
+    justifyContent: "flex-start",
     alignItems: "center",
     padding: 8,
     borderRadius: 9999,
-    marginBottom: 60,
+
+    // added
+    // 여기가 각 날짜의 세로 간격 벌리는 곳
+    // marginVertical: 20,
+    // marginBottom: 60,
   },
   dayText: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#1f2937",
+    color: "#fff",
   },
   todayCell: {
-    backgroundColor: "#4f46e5",
+    backgroundColor: "tomato",
   },
   todayText: {
     color: "white",
@@ -253,5 +348,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "500",
     color: "#9ca3af",
+  },
+  todoContainer: {
+    marginTop: 4,
+    alignItems: "center",
+    zIndex: 3,
+    backgroundColor: "#6b7280",
+  },
+  todoText: {
+    fontSize: 15,
+    color: "#fff",
   },
 });

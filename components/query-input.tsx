@@ -5,12 +5,12 @@ import {
   Platform,
   Pressable,
   StyleSheet,
-  Text,
   TextInput,
   View,
 } from "react-native";
 
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { LinearGradient } from "expo-linear-gradient";
+import PlusText from "./plus-text";
 
 // 일정 추가용 / AI 상호작용 대화창 component
 export default function QueryInput() {
@@ -33,7 +33,7 @@ export default function QueryInput() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={[
         styles.inputContainer,
-        { paddingBottom: 16 + useSafeAreaInsets().bottom },
+        // { paddingBottom: 16 + useSafeAreaInsets().bottom },
       ]}
     >
       <Pressable onPress={Keyboard.dismiss}>
@@ -41,9 +41,9 @@ export default function QueryInput() {
           <TextInput
             value={text}
             placeholder="Input Anything"
-            placeholderTextColor="#1b9bf0"
+            placeholderTextColor="#B3B3B3"
             returnKeyType="send"
-            style={styles.textInput}
+            style={[styles.textInput, { paddingTop: 0 }]}
             multiline={true}
             submitBehavior="blurAndSubmit"
             onChangeText={onChangeText}
@@ -51,9 +51,15 @@ export default function QueryInput() {
           />
           {/* 전송 버튼 */}
           <Pressable style={styles.btnContainer}>
-            <View style={styles.addButton}>
-              <Text style={styles.plusText}>+</Text>
-            </View>
+            <LinearGradient
+              colors={["#F2A892", "#D79EBF", "#AC95F5"]}
+              style={styles.addButton}
+            >
+              <View style={styles.addButton}>
+                {/* <Text style={styles.plusText}>+</Text> */}
+                <PlusText />
+              </View>
+            </LinearGradient>
           </Pressable>
         </View>
       </Pressable>
@@ -67,44 +73,47 @@ const styles = StyleSheet.create({
     // position: "absolute",
     // bottom: 0,
     // flex: 1,
-    paddingTop: 16,
+    paddingVertical: 16,
     paddingHorizontal: 16,
     gap: 8,
     borderTopLeftRadius: 40,
     borderTopRightRadius: 40,
     width: "100%",
-    alignSelf: "center",
-    justifyContent: "center",
+    // alignSelf: "center",
+    // justifyContent: "center",
     // alignItems: "center",
   },
   inner: {
     backgroundColor: "tomato",
+    // inputContainer에 paddingBottom을 적용하는 건 KeyboardAvoidingView 때문에 안됨
+    // 대신 inner에 paddingBottom을 적용하는 걸로 대체
+    paddingBottom: 16,
     paddingLeft: 16,
+    alignItems: "center",
     justifyContent: "space-between",
     flexDirection: "row",
-    alignItems: "center",
   },
   textInput: {
     backgroundColor: "white",
     borderColor: "#1b9bf0",
     borderWidth: 5,
-    // paddingVertical: 10,
-    // paddingHorizontal: 20,
     fontSize: 20,
+    lineHeight: 20 * 1.4,
     // height: "100%",
     // width: "100%",
-    // textAlignVertical: "center",
+    // textAlignVertical: "bottom",
   },
   btnContainer: {
-    backgroundColor: "tomato",
+    backgroundColor: "#000",
   },
   addButton: {
+    // 이렇게 해도 완전히 중앙정렬은 안됨
     justifyContent: "center",
     alignItems: "center",
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: "#1b9bf0",
+    // backgroundColor: "#1b9bf0",
   },
   plusText: {
     fontSize: 50,

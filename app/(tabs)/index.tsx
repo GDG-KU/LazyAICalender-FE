@@ -1,4 +1,5 @@
 import QueryInput from "@/components/query-input";
+import SettingButton from "@/components/ui/setting-button";
 
 import React, { useRef, useState } from "react";
 import {
@@ -52,7 +53,6 @@ export default function Calendar() {
   const handleLayout = (event: LayoutChangeEvent) => {
     const { height } = event.nativeEvent.layout;
     setContainerHeight(height);
-    console.log("containerHeight", height);
   };
 
   const baseDate = new Date();
@@ -106,11 +106,15 @@ export default function Calendar() {
             {
               // 화면 세로 픽셀 - 상단 노치 - 기타 padding, margin 등으로
               // 렌더링할 수 없는 부분 제외하고 날짜 칸의 높이가 최대가 되도록 계산
-              height: (containerHeight - safeAreaHeight - etcHeightPixels) / 6,
+              // height: (containerHeight - safeAreaHeight - etcHeightPixels) / 6,
             },
           ]}
         >
-          <Text style={styles.dayTextInactive}>{daysInPrevMonth - i + 1}</Text>
+          <View style={styles.dayContainer}>
+            <Text style={styles.dayTextInactive}>
+              {daysInPrevMonth - i + 1}
+            </Text>
+          </View>
         </View>
       );
     }
@@ -129,12 +133,16 @@ export default function Calendar() {
           style={[
             styles.dayCell,
             {
-              height: (containerHeight - safeAreaHeight - etcHeightPixels) / 6,
+              // height: (containerHeight - safeAreaHeight - etcHeightPixels) / 6,
             },
-            isToday && styles.todayCell,
+            // ,isToday && styles.todayCell,
           ]}
         >
-          <Text style={[styles.dayText, isToday && styles.todayText]}>{i}</Text>
+          <View style={[styles.dayContainer, isToday && styles.todayContainer]}>
+            <Text style={[styles.dayText, isToday && styles.todayText]}>
+              {i}
+            </Text>
+          </View>
           <View style={styles.todoContainer}>
             <Text key={1} style={styles.todoText}>
               todo
@@ -160,13 +168,15 @@ export default function Calendar() {
             key={`next-${i}`}
             style={[
               styles.dayCell,
-              {
-                height:
-                  (containerHeight - safeAreaHeight - etcHeightPixels) / 6,
-              },
+              // {
+              //   height:
+              //     (containerHeight - safeAreaHeight - etcHeightPixels) / 6,
+              // },
             ]}
           >
-            <Text style={styles.dayTextInactive}>{i}</Text>
+            <View style={styles.dayContainer}>
+              <Text style={styles.dayTextInactive}>{i}</Text>
+            </View>
           </View>
         );
       }
@@ -176,9 +186,10 @@ export default function Calendar() {
     return (
       <View style={styles.card}>
         <View style={styles.header}>
-          <View style={styles.monthYearContainer}>
-            <Text style={styles.monthText}>{monthNames[month]}</Text>
-          </View>
+          {/* <View style={styles.monthYearContainer}> */}
+          <Text style={styles.monthText}>{monthNames[month]}</Text>
+          {/* </View> */}
+          <SettingButton />
         </View>
         <View style={styles.dayNameContainer}>
           {dayNames.map((day) => (
@@ -269,19 +280,21 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   monthText: {
+    width: 36,
+    height: 29,
     fontSize: 24,
     lineHeight: 24 * 1.2,
-    fontWeight: "800",
+    fontWeight: "600",
     color: "#000",
   },
-  yearText: {
-    fontSize: 18,
-    // lineHeight: 상하 추가적인 여백 없이 fontSize와 최대한 동일하게 계산하기 위해
-    lineHeight: 18,
-    fontWeight: "500",
-    color: "#000",
-    marginTop: 4,
-  },
+  // yearText: {
+  //   fontSize: 18,
+  //   // lineHeight: 상하 추가적인 여백 없이 fontSize와 최대한 동일하게 계산하기 위해
+  //   lineHeight: 18,
+  //   fontWeight: "500",
+  //   color: "#000",
+  //   marginTop: 4,
+  // },
   dayNameContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -296,11 +309,12 @@ const styles = StyleSheet.create({
     width: "14.28%",
   },
   dayNameText: {
-    fontSize: 12,
-    lineHeight: 12,
-    fontWeight: "600",
+    fontSize: 14,
+    lineHeight: 14 * 1.2,
+    fontWeight: "500",
     color: "#1E1E1E",
-    textTransform: "uppercase",
+    width: 13,
+    height: 17,
   },
   calendarGrid: {
     flexDirection: "row",
@@ -315,28 +329,48 @@ const styles = StyleSheet.create({
     // aspectRatio: 1, // To make the cells square
     justifyContent: "flex-start",
     alignItems: "center",
-    padding: 8,
-    borderRadius: 9999,
+    padding: 4,
+    // borderRadius: 9999,
+  },
+  dayContainer: {
+    width: 24,
+    height: 24,
+    justifyContent: "center",
+    alignItems: "center",
+    // verticalAlign: "middle",
+    // paddingHorizontal: 8,
+    // paddingVertical: 4,
+  },
+  todayContainer: {
+    backgroundColor: "#2C2C2C",
+    borderRadius: 12,
   },
   dayText: {
-    fontSize: 16,
-    lineHeight: 16,
-    fontWeight: "600",
+    fontSize: 11,
+    lineHeight: 11 * 1.4,
+    // width, height를 고정하니 dayText 정렬이 안됨
+    // width: 15,
+    // height: 15,
+    textAlign: "center",
+    fontWeight: "400",
     color: "#1E1E1E",
   },
   sundayText: {
     color: "#F0A796",
   },
-  todayCell: {
-    backgroundColor: "tomato",
-  },
+  // todayCell: {
+  //   backgroundColor: "tomato",
+  // },
   todayText: {
+    backgroundColor: "#2C2C2C",
     color: "white",
   },
   dayTextInactive: {
-    fontSize: 16,
-    lineHeight: 16,
-    fontWeight: "500",
+    fontSize: 11,
+    lineHeight: 11 * 1.4,
+    fontWeight: "400",
+    width: 5,
+    height: 15,
     color: "#9ca3af",
   },
   todoContainer: {

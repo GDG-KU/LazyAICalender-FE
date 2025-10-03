@@ -21,7 +21,7 @@ export default function QueryInput() {
     setText(text);
   };
 
-  // 전송 버튼 누를 시 trigger되는 함수, 추후 백엔드/AI와 연결 필요
+  // 전송 버튼 누를 시 trigger되는 함수, 추후 백엔드와 연결 필요
   const addSchedule = () => {
     console.log("schedule added");
     setText("");
@@ -55,10 +55,7 @@ export default function QueryInput() {
               colors={["#F2A892", "#D79EBF", "#AC95F5"]}
               style={styles.addButton}
             >
-              <View style={styles.addButton}>
-                {/* <Text style={styles.plusText}>+</Text> */}
-                <PlusText />
-              </View>
+              <PlusText />
             </LinearGradient>
           </Pressable>
         </View>
@@ -73,8 +70,7 @@ const styles = StyleSheet.create({
     // position: "absolute",
     // bottom: 0,
     // flex: 1,
-    paddingVertical: 16,
-    paddingHorizontal: 16,
+    padding: 16,
     gap: 8,
     borderTopLeftRadius: 40,
     borderTopRightRadius: 40,
@@ -82,6 +78,24 @@ const styles = StyleSheet.create({
     // alignSelf: "center",
     // justifyContent: "center",
     // alignItems: "center",
+
+    // Web CSS에서 사용하는 아래와 같은 스타일은 사용 불가
+    // boxShadow: "0 0 50 10 rgba(12,12,13,0.16)",
+    // Shadow Styles for iOS
+    shadowColor: "#0C0C0D",
+    shadowOffset: {
+      width: 0,
+      height: 0,
+    },
+    shadowOpacity: 0.16,
+    shadowRadius: 25, // Figma Blur 값 / 2 정도가 일반적 계산
+
+    // Shadow Styles for Android
+    // 추가로 더 설정할 수 있는 부분이 있음
+    // RN docs
+    // dropShadow: Adds a shadow around the alpha mask of the View (only non-zero alpha pixels in the View will cast a shadow). Takes an optional color representing the shadow color, and 2 or 3 lengths. If 2 lengths are specified they are interperted as offsetX and offsetY which will translate the shadow in the X and Y dimensions respectfully. If a 3rd length is given it is interpreted as the standard deviation of the Guassian blur used on the shadow - so a larger value will blur the shadow more. Read more about the arguments in
+    // https://reactnative.dev/docs/view-style-props#filter
+    elevation: 15,
   },
   inner: {
     backgroundColor: "tomato",
@@ -104,16 +118,14 @@ const styles = StyleSheet.create({
     // textAlignVertical: "bottom",
   },
   btnContainer: {
-    backgroundColor: "#000",
+    backgroundColor: "white",
   },
   addButton: {
-    // 이렇게 해도 완전히 중앙정렬은 안됨
     justifyContent: "center",
     alignItems: "center",
     width: 48,
     height: 48,
     borderRadius: 24,
-    // backgroundColor: "#1b9bf0",
   },
   plusText: {
     fontSize: 50,

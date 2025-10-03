@@ -143,7 +143,7 @@ export default function Calendar() {
               {i}
             </Text>
           </View>
-          <View style={styles.todoContainer}>
+          {/* <View style={styles.dailytodoContainer}>
             <Text key={1} style={styles.todoText}>
               todo
             </Text>
@@ -153,7 +153,7 @@ export default function Calendar() {
             <Text key={3} style={styles.todoText}>
               todo
             </Text>
-          </View>
+          </View> */}
         </View>
       );
     }
@@ -211,37 +211,44 @@ export default function Calendar() {
     <SafeAreaProvider>
       <SafeAreaView style={styles.container} onLayout={handleLayout}>
         {/* 월별 횡 스크롤 가능한 달력 */}
-        <FlatList
-          data={Array.from({ length: 2000 })}
-          // horizontal: 횡 방향으로의 list 나열
-          horizontal
-          // pagingEnabled: 스와이프 시 전/후 월로 전환하는 props
-          pagingEnabled
-          // initialScrollIndex: 현재 월 기준으로 초기 달이 보이도록 설정
-          initialScrollIndex={INITIAL_INDEX}
-          // getItemLayout: 각 달의 달력 가로 길이는 모두 동일하므로 미리 계산하여 계산량 줄임
-          getItemLayout={(_, index) => ({
-            length: screenWidth,
-            offset: screenWidth * index,
-            index,
-          })}
-          showsHorizontalScrollIndicator={false}
-          // onViewableItemsChanged: 횡 스크롤로 보여야 하는 index가 바뀔 경우 trigger됨
-          onViewableItemsChanged={onViewableItemsChanged}
-          // viewabilityConfig: item이 언제 viewable하다고 결정할 지 정하는 부분
-          // 횡스크롤하여 50% 이상 보일 때 'viewable'하다고 설정
-          viewabilityConfig={{ viewAreaCoveragePercentThreshold: 50 }}
-          keyExtractor={(_, index) => index.toString()}
-          // renderItem: index 변화 시 실제 보일 내용을 렌더링하는 부분
-          renderItem={({ index }) => {
-            const date = getDateFromIndex(index);
-            return (
-              <View style={{ width: screenWidth }}>{renderCalendar(date)}</View>
-            );
-          }}
-        />
-
-        <QueryInput />
+        <View style={styles.calendarWrapper}>
+          <FlatList
+            data={Array.from({ length: 2000 })}
+            // horizontal: 횡 방향으로의 list 나열
+            horizontal
+            // pagingEnabled: 스와이프 시 전/후 월로 전환하는 props
+            pagingEnabled
+            // initialScrollIndex: 현재 월 기준으로 초기 달이 보이도록 설정
+            initialScrollIndex={INITIAL_INDEX}
+            // getItemLayout: 각 달의 달력 가로 길이는 모두 동일하므로 미리 계산하여 계산량 줄임
+            getItemLayout={(_, index) => ({
+              length: screenWidth,
+              offset: screenWidth * index,
+              index,
+            })}
+            showsHorizontalScrollIndicator={false}
+            // onViewableItemsChanged: 횡 스크롤로 보여야 하는 index가 바뀔 경우 trigger됨
+            onViewableItemsChanged={onViewableItemsChanged}
+            // viewabilityConfig: item이 언제 viewable하다고 결정할 지 정하는 부분
+            // 횡스크롤하여 50% 이상 보일 때 'viewable'하다고 설정
+            viewabilityConfig={{ viewAreaCoveragePercentThreshold: 50 }}
+            keyExtractor={(_, index) => index.toString()}
+            // renderItem: index 변화 시 실제 보일 내용을 렌더링하는 부분
+            renderItem={({ index }) => {
+              const date = getDateFromIndex(index);
+              return (
+                <View style={{ width: screenWidth }}>
+                  {renderCalendar(date)}
+                </View>
+              );
+            }}
+          />
+        </View>
+        <View style={styles.todoContainer}></View>
+        {/* 달력이랑 하단 todo listing 비율 3:4 */}
+        <View style={styles.queryInputWrapper}>
+          <QueryInput />
+        </View>
       </SafeAreaView>
     </SafeAreaProvider>
   );
@@ -250,14 +257,21 @@ export default function Calendar() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#888",
+    backgroundColor: "white",
     alignItems: "center",
     // justifyContent: "center",
     // 5주, 6주에 따른 높이가 다르기 때문에
     // calendarGrid를 세로 중앙 정렬시키는 justifyContent를 삭제
   },
+  calendarWrapper: {
+    // 월 표시와 달력 칸을 합쳐 비율 6:7로 결정
+    flex: 6,
+    width: "100%",
+  },
   card: {
+    // 달력이랑 todo 비율 맞추기
     flex: 1,
+
     backgroundColor: "white",
     // borderRadius: 24,
     // shadowColor: "#000",
@@ -280,7 +294,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   monthText: {
-    width: 36,
+    // width: 36,
     height: 29,
     fontSize: 24,
     lineHeight: 24 * 1.2,
@@ -317,6 +331,9 @@ const styles = StyleSheet.create({
     height: 17,
   },
   calendarGrid: {
+    // added
+    flex: 1,
+
     flexDirection: "row",
     flexWrap: "wrap",
     // paddingHorizontal: 16,
@@ -324,7 +341,7 @@ const styles = StyleSheet.create({
   },
   dayCell: {
     width: "14.28%", // 100% / 7 days
-
+    height: "16.66%",
     // 이걸 줘서 최하단에 예상하지 않은 추가 공백이 생김
     // aspectRatio: 1, // To make the cells square
     justifyContent: "flex-start",
@@ -358,9 +375,6 @@ const styles = StyleSheet.create({
   sundayText: {
     color: "#F0A796",
   },
-  // todayCell: {
-  //   backgroundColor: "tomato",
-  // },
   todayText: {
     backgroundColor: "#2C2C2C",
     color: "white",
@@ -368,12 +382,13 @@ const styles = StyleSheet.create({
   dayTextInactive: {
     fontSize: 11,
     lineHeight: 11 * 1.4,
+    textAlign: "center",
     fontWeight: "400",
-    width: 5,
-    height: 15,
+    // width: 5,
+    // height: 15,
     color: "#9ca3af",
   },
-  todoContainer: {
+  dailytodoContainer: {
     marginTop: 4,
     alignItems: "center",
     // zIndex: 3,
@@ -384,8 +399,15 @@ const styles = StyleSheet.create({
     lineHeight: 15,
     color: "#fff",
   },
-  keyboardAvoidingView: {
-    flex: 1,
-    justifyContent: "flex-end",
+  todoContainer: {
+    // 달력이랑 todo 비율 맞추기
+    flex: 7,
+    backgroundColor: "#F5F5F5",
+    width: "100%",
+  },
+  queryInputWrapper: {
+    position: "absolute",
+    bottom: 0,
+    width: "100%",
   },
 });

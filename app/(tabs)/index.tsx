@@ -1,3 +1,4 @@
+import DayCell from "@/components/day-cell";
 import QueryInput from "@/components/query-input";
 import SettingButton from "@/components/ui/setting-button";
 
@@ -99,23 +100,13 @@ export default function Calendar() {
     // 이전 달의 날짜 component 추가
     for (let i = firstDay; i > 0; i--) {
       days.push(
-        <View
+        <DayCell
           key={`prev-${i}`}
-          style={[
-            styles.dayCell,
-            {
-              // 화면 세로 픽셀 - 상단 노치 - 기타 padding, margin 등으로
-              // 렌더링할 수 없는 부분 제외하고 날짜 칸의 높이가 최대가 되도록 계산
-              // height: (containerHeight - safeAreaHeight - etcHeightPixels) / 6,
-            },
-          ]}
-        >
-          <View style={styles.dayContainer}>
-            <Text style={styles.dayTextInactive}>
-              {daysInPrevMonth - i + 1}
-            </Text>
-          </View>
-        </View>
+          monthPosition={"prev"}
+          date={i}
+          isToday={false}
+          daysInPrevMonth={daysInPrevMonth}
+        />
       );
     }
 
@@ -128,33 +119,13 @@ export default function Calendar() {
         year === today.getFullYear();
 
       days.push(
-        <View
+        <DayCell
           key={`current-${i}`}
-          style={[
-            styles.dayCell,
-            {
-              // height: (containerHeight - safeAreaHeight - etcHeightPixels) / 6,
-            },
-            // ,isToday && styles.todayCell,
-          ]}
-        >
-          <View style={[styles.dayContainer, isToday && styles.todayContainer]}>
-            <Text style={[styles.dayText, isToday && styles.todayText]}>
-              {i}
-            </Text>
-          </View>
-          {/* <View style={styles.dailytodoContainer}>
-            <Text key={1} style={styles.todoText}>
-              todo
-            </Text>
-            <Text key={2} style={styles.todoText}>
-              todo
-            </Text>
-            <Text key={3} style={styles.todoText}>
-              todo
-            </Text>
-          </View> */}
-        </View>
+          monthPosition={"current"}
+          date={i}
+          isToday={isToday}
+          daysInPrevMonth={daysInPrevMonth}
+        />
       );
     }
 
@@ -164,20 +135,13 @@ export default function Calendar() {
       const trailingDays = 6 - lastDay;
       for (let i = 1; i <= trailingDays; i++) {
         days.push(
-          <View
+          <DayCell
             key={`next-${i}`}
-            style={[
-              styles.dayCell,
-              // {
-              //   height:
-              //     (containerHeight - safeAreaHeight - etcHeightPixels) / 6,
-              // },
-            ]}
-          >
-            <View style={styles.dayContainer}>
-              <Text style={styles.dayTextInactive}>{i}</Text>
-            </View>
-          </View>
+            monthPosition={"next"}
+            date={i}
+            isToday={false}
+            daysInPrevMonth={daysInPrevMonth}
+          />
         );
       }
     }
@@ -339,54 +303,8 @@ const styles = StyleSheet.create({
     // paddingHorizontal: 16,
     // marginTop: 8,
   },
-  dayCell: {
-    width: "14.28%", // 100% / 7 days
-    height: "16.66%",
-    // 이걸 줘서 최하단에 예상하지 않은 추가 공백이 생김
-    // aspectRatio: 1, // To make the cells square
-    justifyContent: "flex-start",
-    alignItems: "center",
-    padding: 4,
-    // borderRadius: 9999,
-  },
-  dayContainer: {
-    width: 24,
-    height: 24,
-    justifyContent: "center",
-    alignItems: "center",
-    // verticalAlign: "middle",
-    // paddingHorizontal: 8,
-    // paddingVertical: 4,
-  },
-  todayContainer: {
-    backgroundColor: "#2C2C2C",
-    borderRadius: 12,
-  },
-  dayText: {
-    fontSize: 11,
-    lineHeight: 11 * 1.4,
-    // width, height를 고정하니 dayText 정렬이 안됨
-    // width: 15,
-    // height: 15,
-    textAlign: "center",
-    fontWeight: "400",
-    color: "#1E1E1E",
-  },
   sundayText: {
     color: "#F0A796",
-  },
-  todayText: {
-    backgroundColor: "#2C2C2C",
-    color: "white",
-  },
-  dayTextInactive: {
-    fontSize: 11,
-    lineHeight: 11 * 1.4,
-    textAlign: "center",
-    fontWeight: "400",
-    // width: 5,
-    // height: 15,
-    color: "#9ca3af",
   },
   dailytodoContainer: {
     marginTop: 4,

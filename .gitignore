@@ -2,14 +2,11 @@
 
 # dependencies
 node_modules/
-package.json
-package-lock.json
 
 # Expo
 .expo/
 dist/
 web-build/
-expo-env.d.ts
 
 # Native
 .kotlin/
@@ -45,11 +42,6 @@ app-example
 /android
 
 # etc
-app.json
-eslint.config.js
-tsconfig.json
 .vscode
 .cursor
 .gitignore
-scripts/
-assets/

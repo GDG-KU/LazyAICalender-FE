@@ -1,0 +1,113 @@
+// React 라이브러리 import (JSX 사용을 위해 필요)
+import React from "react";
+// React Native의 UI 컴포넌트들 import
+import { StyleSheet, Text, View, Pressable } from "react-native";
+
+// ===== 투두 아이템 데이터 타입 정의 =====
+// 투두 아이템의 데이터 구조를 정의하는 인터페이스
+export interface TodoItem {
+  id: string;           // 투두의 고유 식별자 (각 투두를 구분하기 위한 유니크한 값)
+  text: string;         // 투두의 내용 텍스트 (사용자가 입력한 할 일 내용)
+  completed: boolean;   // 완료 여부 (true = 완료됨, false = 미완료)
+  category: string;     // 카테고리 정보 (예: "업무", "개인", "건강" 등)
+  time?: string;        // 예정 시간 (예: "오후 5시") - ?는 선택적 속성임을 의미
+}
+
+// ===== TodoBlock 컴포넌트 Props 타입 정의 =====
+// TodoBlock 컴포넌트가 부모 컴포넌트로부터 받을 데이터의 구조를 정의
+interface TodoBlockProps {
+  todo: TodoItem;                           // 표시할 투두 데이터 객체 (TodoItem 타입)
+  onToggleTodo: (id: string) => void;       // 체크박스 클릭 시 호출될 함수 (투두 id를 매개변수로 받음)
+}
+
+// ===== TodoBlock 컴포넌트 (메인 컴포넌트) =====
+// 개별 투두 아이템을 표시하는 컴포넌트
+// props: todo(투두 데이터), onToggleTodo(완료 상태 토글 함수)
+export default function TodoBlock({ todo, onToggleTodo }: TodoBlockProps) {
+  return (
+    <View style={styles.todoBlock}>
+      {/* ===== 체크박스 영역 (터치 가능) ===== */}
+      <Pressable
+        style={[
+          styles.checkbox,                           // 기본 체크박스 스타일
+          todo.completed && styles.checkedBox        // 완료된 경우 추가 스타일 적용
+        ]}
+        onPress={() => onToggleTodo(todo.id)}        // 클릭 시 해당 투두의 완료 상태 토글
+      >
+        {/* 완료된 경우에만 체크마크(✓) 표시 */}
+        {todo.completed && <Text style={styles.checkmark}>✓</Text>}
+      </Pressable>
+      
+      {/* ===== 투두 텍스트 영역 ===== */}
+      <Text style={[
+        styles.todoText,                             // 기본 투두 텍스트 스타일
+        todo.completed && styles.completedText,      // 완료된 경우 취소선과 회색 텍스트 적용
+      ]}>
+        {todo.text}                                  {/* 투두 내용 표시 */}
+      </Text>
+      
+      {/* ===== 시간 표시 영역 (조건부 렌더링) ===== */}
+      {/* time 속성이 있는 경우에만 시간 텍스트 표시 */}
+      {todo.time && (
+        <Text style={styles.timeText}>{todo.time}</Text>
+      )}
+    </View>
+  );
+}
+
+// ===== 스타일 정의 =====
+// StyleSheet.create를 사용하여 컴포넌트의 스타일을 정의
+const styles = StyleSheet.create({
+  // ===== 투두 블록 전체 컨테이너 스타일 =====
+  todoBlock: {
+    flexDirection: "row",        // 자식 요소들(체크박스, 텍스트, 시간)을 가로로 배열
+    alignItems: "center",        // 자식 요소들을 세로 중앙 정렬
+    backgroundColor: "#F8F8F8",  // 밝은 회색 배경색 (투두 아이템의 배경)
+    paddingHorizontal: 16,       // 좌우 내부 여백 16px
+    paddingVertical: 12,         // 상하 내부 여백 12px
+    marginBottom: 8,             // 아래쪽 외부 여백 8px (다음 투두와의 간격)
+    borderRadius: 12,            // 모서리를 12px 둥글게 처리
+    marginHorizontal: 16,        // 좌우 외부 여백 16px (화면 가장자리와의 간격)
+  },
+  // ===== 체크박스 스타일 =====
+  checkbox: {
+    width: 20,                   // 체크박스 너비 20px
+    height: 20,                  // 체크박스 높이 20px
+    borderRadius: 10,            // 완전히 둥근 모양 (원형 체크박스)
+    borderWidth: 2,              // 테두리 두께 2px
+    borderColor: "#D1D5DB",      // 연한 회색 테두리 (미완료 상태)
+    backgroundColor: "white",    // 배경색 흰색 (미완료 상태)
+    justifyContent: "center",    // 체크마크를 가로 중앙 정렬
+    alignItems: "center",        // 체크마크를 세로 중앙 정렬
+    marginRight: 12,             // 오른쪽 여백 12px (투두 텍스트와의 간격)
+  },
+  // ===== 완료된 체크박스 스타일 =====
+  checkedBox: {
+    backgroundColor: "#374151",  // 진한 회색 배경 (완료 상태)
+    borderColor: "#374151",      // 진한 회색 테두리 (완료 상태)
+  },
+  // ===== 체크마크(✓) 텍스트 스타일 =====
+  checkmark: {
+    color: "white",              // 흰색 텍스트 (진한 배경에 잘 보이도록)
+    fontSize: 12,                // 폰트 크기 12px
+    fontWeight: "bold",          // 굵은 글씨 (체크마크가 더 명확하게 보이도록)
+  },
+  // ===== 투두 텍스트 스타일 =====
+  todoText: {
+    flex: 1,                     // 남은 공간을 모두 차지 (체크박스와 시간 사이의 공간)
+    fontSize: 16,                // 폰트 크기 16px
+    color: "#1F2937",            // 진한 회색 텍스트 (가독성을 위한 색상)
+    fontWeight: "500",           // 중간 굵기 폰트 (적당한 두께)
+  },
+  // ===== 완료된 투두 텍스트 스타일 =====
+  completedText: {
+    textDecorationLine: "line-through", // 취소선 그리기 (완료된 투두임을 시각적으로 표시)
+    color: "#9CA3AF",                   // 연한 회색으로 변경 (완료된 투두는 흐리게 표시)
+  },
+  // ===== 시간 텍스트 스타일 =====
+  timeText: {
+    fontSize: 14,                // 폰트 크기 14px (투두 텍스트보다 작게)
+    color: "#9CA3AF",            // 연한 회색 시간 텍스트 (보조 정보임을 나타냄)
+    fontWeight: "400",           // 일반 굵기 폰트 (투두 텍스트보다 얇게)
+  },
+});

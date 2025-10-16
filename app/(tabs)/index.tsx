@@ -53,8 +53,7 @@ export default function Calendar() {
   // 날짜를 키로 하고 해당 날짜의 투두 배열을 값으로 하는 객체
   // 형식: "2024-01-15" => [투두1, 투두2, ...]
   const [todosByDate, setTodosByDate] = useState<Record<string, TodoItem[]>>({
-    // 오늘 날짜의 샘플 투두들
-    [new Date().toISOString().split('T')[0]]: [
+    ["2025-10-17"]: [
       {
         id: "1",                    // 투두의 고유 식별자
         text: "프로젝트 회의 준비",   // 투두 내용
@@ -77,8 +76,7 @@ export default function Calendar() {
         // time이 없으면 시간 표시 안됨
       }
     ],
-    // 내일 날짜의 샘플 투두들
-    [new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0]]: [
+    ["2025-10-18"]: [
       {
         id: "4",
         text: "병원 예약",
@@ -171,6 +169,7 @@ export default function Calendar() {
   const renderCalendar = (date: Date) => {
     const year = date.getFullYear();
     const month = date.getMonth();
+    const calendarDate = date; // 달력이 표시하는 날짜 저장
 
     const daysInMonth = getDaysInMonth(year, month);
     const firstDay = getFirstDayOfMonth(year, month);
@@ -190,6 +189,7 @@ export default function Calendar() {
           daysInPrevMonth={daysInPrevMonth}
           onDateClick={handleDateClick}  // 날짜 클릭 핸들러 전달
           selectedDate={selectedDate}    // 선택된 날짜 전달
+          calendarDate={calendarDate}    // 달력 날짜 전달
         />
       );
     }
@@ -211,6 +211,7 @@ export default function Calendar() {
           daysInPrevMonth={daysInPrevMonth}
           onDateClick={handleDateClick}  // 날짜 클릭 핸들러 전달
           selectedDate={selectedDate}    // 선택된 날짜 전달
+          calendarDate={calendarDate}    // 달력 날짜 전달
         />
       );
     }
@@ -229,6 +230,7 @@ export default function Calendar() {
             daysInPrevMonth={daysInPrevMonth}
             onDateClick={handleDateClick}  // 날짜 클릭 핸들러 전달
             selectedDate={selectedDate}    // 선택된 날짜 전달
+            calendarDate={calendarDate}    // 달력 날짜 전달
           />
         );
       }

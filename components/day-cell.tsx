@@ -11,6 +11,7 @@ interface DayCellProps {
   daysInPrevMonth: number;
   onDateClick?: (date: Date) => void;  // 날짜 클릭 시 호출될 함수 (선택적)
   selectedDate?: Date;                 // 현재 선택된 날짜 (선택적)
+  calendarDate?: Date;                 // 달력이 표시하는 날짜 (년월 정보)
 }
 
 export default function DayCell({
@@ -20,14 +21,14 @@ export default function DayCell({
   daysInPrevMonth,
   onDateClick,
   selectedDate,
+  calendarDate,
 }: DayCellProps) {
   // ===== 날짜 클릭 핸들러 =====
   // 사용자가 날짜를 클릭했을 때 호출되는 함수
   const handlePress = () => {
-    if (onDateClick && monthPosition === "current") {
-      // 현재 달의 날짜만 클릭 가능하도록 제한
-      const currentDate = new Date();
-      const clickedDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), date);
+    if (onDateClick && monthPosition === "current" && calendarDate) {
+      // 달력이 표시하는 년월을 기준으로 날짜 생성
+      const clickedDate = new Date(calendarDate.getFullYear(), calendarDate.getMonth(), date);
       onDateClick(clickedDate);
     }
   };
@@ -36,8 +37,9 @@ export default function DayCell({
   // 현재 날짜가 선택된 날짜와 일치하는지 확인
   const isSelected = selectedDate && 
     selectedDate.getDate() === date && 
-    selectedDate.getMonth() === new Date().getMonth() && 
-    selectedDate.getFullYear() === new Date().getFullYear() &&
+    calendarDate &&
+    selectedDate.getMonth() === calendarDate.getMonth() && 
+    selectedDate.getFullYear() === calendarDate.getFullYear() &&
     monthPosition === "current";
 
   return (

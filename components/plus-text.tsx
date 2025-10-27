@@ -1,6 +1,7 @@
 import * as React from "react";
 import Svg, { Path, SvgProps } from "react-native-svg";
 
+// 여기 이름 변경하기
 const PlusText = (props: SvgProps) => (
   <Svg width={26} height={26} fill="none" {...props}>
     <Path

@@ -10,12 +10,13 @@ import {
 } from "react-native";
 
 import { LinearGradient } from "expo-linear-gradient";
-import PlusText from "./plus-text";
+import SendButton from "./send-button";
 
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 // 일정 추가용 / AI 상호작용 대화창 component
 export default function QueryInput() {
   const [text, setText] = useState<string>("");
-
+  const insets = useSafeAreaInsets();
   // TextInput의 변화를 감지해서 그 안의 내용을 text라는 state에 저장
   const onChangeText = (text: string) => {
     setText(text);
@@ -31,18 +32,18 @@ export default function QueryInput() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={[
-        styles.inputContainer,
-        // { paddingBottom: 16 + useSafeAreaInsets().bottom },
-      ]}
+      style={[styles.inputContainer, { paddingBottom: 8 + insets.bottom }]}
     >
       <Pressable onPress={Keyboard.dismiss}>
         <View style={styles.inner}>
           <TextInput
             value={text}
-            placeholder="Input Anything"
-            placeholderTextColor="#B3B3B3"
+            placeholder="어떤 일정을 추가할까요?"
+            placeholderTextColor="#767676"
             returnKeyType="send"
+            // multiline=true일 경우 iOS에 대해 RN가 자동적으로 paddingTop을 추가하기에
+            // 그를 막기 위한 추가 CSS style
+            // textAlignVertical: "top" 추가해야 하나 보기, multiline input에 대해 효과적인 스타일
             style={[styles.textInput, { paddingTop: 0 }]}
             multiline={true}
             submitBehavior="blurAndSubmit"
@@ -51,11 +52,17 @@ export default function QueryInput() {
           />
           {/* 전송 버튼 */}
           <Pressable style={styles.btnContainer}>
+            {/* onPress prop 추가하기 */}
             <LinearGradient
               colors={["#F2A892", "#D79EBF", "#AC95F5"]}
-              style={styles.addButton}
+              start={{ x: 0.0, y: 0.0 }}
+              end={{ x: 1.0, y: 0.0 }}
+              locations={[0.1531, 0.5024, 0.8517]}
+              style={styles.gradientBorder}
             >
-              <PlusText />
+              <View style={styles.addButton}>
+                <SendButton />
+              </View>
             </LinearGradient>
           </Pressable>
         </View>
@@ -66,18 +73,22 @@ export default function QueryInput() {
 
 const styles = StyleSheet.create({
   inputContainer: {
-    backgroundColor: "white",
-    // position: "absolute",
-    // bottom: 0,
+    position: "absolute",
+    bottom: 8,
+    backgroundColor: "#1E1E1E",
     // flex: 1,
-    padding: 16,
+    paddingTop: 8,
+    paddingHorizontal: 8,
+
     gap: 8,
-    borderTopLeftRadius: 40,
-    borderTopRightRadius: 40,
-    width: "100%",
-    // alignSelf: "center",
-    // justifyContent: "center",
-    // alignItems: "center",
+
+    borderRadius: 100,
+    width: "91%",
+    alignSelf: "center",
+
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
 
     // Web CSS에서 사용하는 아래와 같은 스타일은 사용 불가
     // boxShadow: "0 0 50 10 rgba(12,12,13,0.16)",
@@ -98,19 +109,20 @@ const styles = StyleSheet.create({
     elevation: 15,
   },
   inner: {
-    backgroundColor: "tomato",
     // inputContainer에 paddingBottom을 적용하는 건 KeyboardAvoidingView 때문에 안됨
     // 대신 inner에 paddingBottom을 적용하는 걸로 대체
-    paddingBottom: 16,
+    // paddingBottom: 16,
     paddingLeft: 16,
+    // 원래는 inputContainer에 적용되어야 하는 스타일인데 SafeAreaView issue로 부득이하게 여기에 적용
+    paddingBottom: 8,
     alignItems: "center",
+    alignSelf: "stretch",
     justifyContent: "space-between",
     flexDirection: "row",
+    width: "100%",
   },
   textInput: {
-    backgroundColor: "white",
-    borderColor: "#1b9bf0",
-    borderWidth: 5,
+    backgroundColor: "#1E1E1E",
     fontSize: 20,
     lineHeight: 20 * 1.4,
     // height: "100%",
@@ -118,14 +130,27 @@ const styles = StyleSheet.create({
     // textAlignVertical: "bottom",
   },
   btnContainer: {
-    backgroundColor: "white",
+    backgroundColor: "1E1E1E",
+  },
+  // borderColor에 LinearGradient를 적용하는 것은 어려움,
+  // gradientBorder에 비해 addButton을 약간 작게 만들어 마치 테두리를 준 것처럼 보이게 하기
+  gradientBorder: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    padding: 2,
+    justifyContent: "center",
+    alignItems: "center",
   },
   addButton: {
     justifyContent: "center",
     alignItems: "center",
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "#1E1E1E",
+    // borderWidth: 0.857,
+    // borderColor: "#FFF",
   },
   plusText: {
     fontSize: 50,

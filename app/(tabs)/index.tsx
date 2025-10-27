@@ -1,8 +1,9 @@
+import CategoryTodoList from "@/components/category-todo-list";
 import DayCell from "@/components/day-cell";
 import QueryInput from "@/components/query-input";
-import SettingButton from "@/components/ui/setting-button";
-import CategoryTodoList from "@/components/category-todo-list";
-import { TodoItem } from "@/components/selected-date-todo";
+import SettingButton from "@/components/setting-button";
+import { TodoItem } from "@/components/todo-block";
+import ViewConvertButton from "@/components/view-convert-button";
 
 import React, { useRef, useState } from "react";
 import {
@@ -44,84 +45,86 @@ const INITIAL_INDEX = 1000;
 
 export default function Calendar() {
   const [currentMonthIndex, setCurrentMonthIndex] = useState(INITIAL_INDEX);
-  
+
   // ===== 선택된 날짜 상태 관리 =====
   // 사용자가 클릭한 날짜를 저장하는 상태 (기본값: 오늘 날짜)
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  
+
   // ===== 날짜별 투두 데이터 관리 =====
   // 날짜를 키로 하고 해당 날짜의 투두 배열을 값으로 하는 객체
   // 형식: "2024-01-15" => [투두1, 투두2, ...]
   const [todosByDate, setTodosByDate] = useState<Record<string, TodoItem[]>>({
-    ["2025-10-17"]: [
+    // 오늘 날짜의 샘플 투두들
+    [new Date().toISOString().split("T")[0]]: [
       {
-        id: "1",                    // 투두의 고유 식별자
-        text: "프로젝트 회의 준비",   // 투두 내용
-        completed: false,           // 완료 여부 (false = 미완료)
-        category: "업무",           // 카테고리 분류
-        time: "오후 2시"            // 예정 시간 (선택사항)
+        id: "1", // 투두의 고유 식별자
+        text: "프로젝트 회의 준비", // 투두 내용
+        completed: false, // 완료 여부 (false = 미완료)
+        category: "업무", // 카테고리 분류
+        time: "오후 2시", // 예정 시간 (선택사항)
       },
       {
-        id: "2", 
+        id: "2",
         text: "장보기",
-        completed: true,            // 완료된 투두 (체크박스에 체크됨)
+        completed: true, // 완료된 투두 (체크박스에 체크됨)
         category: "개인",
-        time: "오후 5시"
+        time: "오후 5시",
       },
       {
         id: "3",
         text: "운동하기",
         completed: false,
-        category: "건강"
+        category: "건강",
         // time이 없으면 시간 표시 안됨
-      }
+      },
     ],
-    ["2025-10-18"]: [
+    // 내일 날짜의 샘플 투두들
+    [new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split("T")[0]]: [
       {
         id: "4",
         text: "병원 예약",
         completed: false,
         category: "건강",
-        time: "오전 10시"
+        time: "오전 10시",
       },
       {
         id: "5",
         text: "책 읽기",
         completed: false,
-        category: "개인"
-      }
-    ]
+        category: "개인",
+      },
+    ],
   });
 
   // ===== 날짜 클릭 핸들러 함수 =====
   // 사용자가 달력의 날짜를 클릭했을 때 호출되는 함수
   // date: 클릭된 날짜 객체
   const handleDateClick = (date: Date) => {
-    setSelectedDate(date);  // 선택된 날짜 상태 업데이트
+    setSelectedDate(date); // 선택된 날짜 상태 업데이트
   };
 
   // ===== 투두 완료 상태 토글 함수 =====
   // 사용자가 투두의 체크박스를 클릭했을 때 호출되는 함수
   // id: 토글할 투두의 고유 식별자
   const toggleTodo = (id: string) => {
-    const dateKey = selectedDate.toISOString().split('T')[0];  // 선택된 날짜를 키로 변환
-    
-    setTodosByDate(prevTodosByDate => ({
+    const dateKey = selectedDate.toISOString().split("T")[0]; // 선택된 날짜를 키로 변환
+
+    setTodosByDate((prevTodosByDate) => ({
       ...prevTodosByDate,
-      [dateKey]: prevTodosByDate[dateKey]?.map(todo => 
-        // 클릭된 투두의 id와 일치하는 경우에만 completed 상태를 반대로 변경
-        todo.id === id ? { ...todo, completed: !todo.completed } : todo
-      ) || []  // 해당 날짜에 투두가 없으면 빈 배열 반환
+      [dateKey]:
+        prevTodosByDate[dateKey]?.map((todo) =>
+          // 클릭된 투두의 id와 일치하는 경우에만 completed 상태를 반대로 변경
+          todo.id === id ? { ...todo, completed: !todo.completed } : todo
+        ) || [], // 해당 날짜에 투두가 없으면 빈 배열 반환
     }));
   };
 
   // ===== 선택된 날짜의 투두 가져오기 함수 =====
   // 현재 선택된 날짜에 해당하는 투두 배열을 반환하는 함수
   const getTodosForSelectedDate = (): TodoItem[] => {
-    const dateKey = selectedDate.toISOString().split('T')[0];  // 선택된 날짜를 키로 변환
-    return todosByDate[dateKey] || [];  // 해당 날짜의 투두가 없으면 빈 배열 반환
+    const dateKey = selectedDate.toISOString().split("T")[0]; // 선택된 날짜를 키로 변환
+    return todosByDate[dateKey] || []; // 해당 날짜의 투두가 없으면 빈 배열 반환
   };
-
 
   // containerHeight: 최상단 SafeAreaView의 디스플레이 세로 픽셀 값 / _layout.tsx의 <Tabs> 높이 제외
   const [containerHeight, setContainerHeight] = useState(0);
@@ -165,6 +168,9 @@ export default function Calendar() {
     }
   ).current;
 
+  const currentMonthDate = getDateFromIndex(currentMonthIndex);
+  const currentMonthName = monthNames[currentMonthDate.getMonth()];
+
   // 달력 렌더링
   const renderCalendar = (date: Date) => {
     const year = date.getFullYear();
@@ -187,9 +193,9 @@ export default function Calendar() {
           date={i}
           isToday={false}
           daysInPrevMonth={daysInPrevMonth}
-          onDateClick={handleDateClick}  // 날짜 클릭 핸들러 전달
-          selectedDate={selectedDate}    // 선택된 날짜 전달
-          calendarDate={calendarDate}    // 달력 날짜 전달
+          onDateClick={handleDateClick} // 날짜 클릭 핸들러 전달
+          selectedDate={selectedDate} // 선택된 날짜 전달
+          calendarDate={calendarDate} // 달력 날짜 전달
         />
       );
     }
@@ -209,9 +215,9 @@ export default function Calendar() {
           date={i}
           isToday={isToday}
           daysInPrevMonth={daysInPrevMonth}
-          onDateClick={handleDateClick}  // 날짜 클릭 핸들러 전달
-          selectedDate={selectedDate}    // 선택된 날짜 전달
-          calendarDate={calendarDate}    // 달력 날짜 전달
+          onDateClick={handleDateClick} // 날짜 클릭 핸들러 전달
+          selectedDate={selectedDate} // 선택된 날짜 전달
+          calendarDate={calendarDate} // 달력 날짜 전달
         />
       );
     }
@@ -228,9 +234,9 @@ export default function Calendar() {
             date={i}
             isToday={false}
             daysInPrevMonth={daysInPrevMonth}
-            onDateClick={handleDateClick}  // 날짜 클릭 핸들러 전달
-            selectedDate={selectedDate}    // 선택된 날짜 전달
-            calendarDate={calendarDate}    // 달력 날짜 전달
+            onDateClick={handleDateClick} // 날짜 클릭 핸들러 전달
+            selectedDate={selectedDate} // 선택된 날짜 전달
+            calendarDate={calendarDate} // 달력 날짜 전달
           />
         );
       }
@@ -239,12 +245,6 @@ export default function Calendar() {
     // 실제 calendar view를 구성하는 부분
     return (
       <View style={styles.card}>
-        <View style={styles.header}>
-          {/* <View style={styles.monthYearContainer}> */}
-          <Text style={styles.monthText}>{monthNames[month]}</Text>
-          {/* </View> */}
-          <SettingButton />
-        </View>
         <View style={styles.dayNameContainer}>
           {dayNames.map((day) => (
             <View key={day} style={styles.dayNameCell}>
@@ -266,6 +266,13 @@ export default function Calendar() {
       <SafeAreaView style={styles.container} onLayout={handleLayout}>
         {/* 월별 횡 스크롤 가능한 달력 */}
         <View style={styles.calendarWrapper}>
+          <View style={styles.header}>
+            {/* <View style={styles.monthYearContainer}> */}
+            <ViewConvertButton />
+            <Text style={styles.monthText}>{currentMonthName}</Text>
+            {/* </View> */}
+            <SettingButton />
+          </View>
           <FlatList
             data={Array.from({ length: 2000 })}
             // horizontal: 횡 방향으로의 list 나열
@@ -300,16 +307,14 @@ export default function Calendar() {
         </View>
         {/* ===== 투두 리스트 영역 ===== */}
         <View style={styles.todoContainer}>
-          <CategoryTodoList 
-            todos={getTodosForSelectedDate()}  // 선택된 날짜의 투두 전달
-            onToggleTodo={toggleTodo}          // 투두 토글 함수 전달
+          <CategoryTodoList
+            todos={getTodosForSelectedDate()} // 선택된 날짜의 투두 전달
+            onToggleTodo={toggleTodo} // 투두 토글 함수 전달
           />
         </View>
         {/* 달력이랑 하단 todo listing 비율 3:4 */}
-        <View style={styles.queryInputWrapper}>
-          <QueryInput />
-        </View>
       </SafeAreaView>
+      <QueryInput />
     </SafeAreaProvider>
   );
 }
@@ -323,13 +328,15 @@ const styles = StyleSheet.create({
     // 5주, 6주에 따른 높이가 다르기 때문에
     // calendarGrid를 세로 중앙 정렬시키는 justifyContent를 삭제
   },
+  // calendarWrapper : todoContainer = 393: 386
   calendarWrapper: {
     // 월 표시와 달력 칸을 합쳐 비율 6:7로 결정
-    flex: 6,
+    flex: 393,
     width: "100%",
   },
   card: {
-    // 달력이랑 todo 비율 맞추기
+    // 달력이랑 todo 비율 맞추기, 이걸 지워야 DayCell이 세로로 꽉 차게 할 수 있다?
+    // 확실하지 않음
     flex: 1,
 
     backgroundColor: "white",
@@ -349,6 +356,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    paddingHorizontal: 16,
   },
   monthYearContainer: {
     alignItems: "center",
@@ -400,7 +408,7 @@ const styles = StyleSheet.create({
     // marginTop: 8,
   },
   sundayText: {
-    color: "#F0A796",
+    color: "#EC221F",
   },
   dailytodoContainer: {
     marginTop: 4,
@@ -415,13 +423,10 @@ const styles = StyleSheet.create({
   },
   // ===== 투두 컨테이너 스타일 =====
   todoContainer: {
-    flex: 7,                    // 달력과 투두 영역의 비율 (달력:투두 = 6:7)
+    flex: 386, // 달력과 투두 영역의 비율 (달력:투두 = 6:7)
     backgroundColor: "#F5F5F5", // 회색 배경색 (달력 아래쪽 회색 영역)
-    width: "100%",              // 전체 너비 사용
-  },
-  queryInputWrapper: {
-    position: "absolute",
-    bottom: 0,
-    width: "100%",
+    width: "100%", // 전체 너비 사용
+    paddingHorizontal: 16,
+    paddingTop: 24,
   },
 });

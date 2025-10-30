@@ -9,17 +9,12 @@ import React, { useRef, useState } from "react";
 import {
   Dimensions,
   FlatList,
-  LayoutChangeEvent,
   StyleSheet,
   Text,
   View,
   ViewToken,
 } from "react-native";
-import {
-  SafeAreaProvider,
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
@@ -59,6 +54,13 @@ export default function Calendar() {
       {
         id: "1", // 투두의 고유 식별자
         text: "프로젝트 회의 준비", // 투두 내용
+        completed: false, // 완료 여부 (false = 미완료)
+        category: "업무", // 카테고리 분류
+        time: "오후 2시", // 예정 시간 (선택사항)
+      },
+      {
+        id: "6", // 투두의 고유 식별자
+        text: "프로젝트 회의", // 투두 내용
         completed: false, // 완료 여부 (false = 미완료)
         category: "업무", // 카테고리 분류
         time: "오후 2시", // 예정 시간 (선택사항)
@@ -126,18 +128,14 @@ export default function Calendar() {
     return todosByDate[dateKey] || []; // 해당 날짜의 투두가 없으면 빈 배열 반환
   };
 
-  // containerHeight: 최상단 SafeAreaView의 디스플레이 세로 픽셀 값 / _layout.tsx의 <Tabs> 높이 제외
-  const [containerHeight, setContainerHeight] = useState(0);
-  // 상단 notch 부분 높이
-  const safeAreaHeight = useSafeAreaInsets().top;
-  //
-  const etcHeightPixels = 187;
+  // // containerHeight: 최상단 SafeAreaView의 디스플레이 세로 픽셀 값 / _layout.tsx의 <Tabs> 높이 제외
+  // const [containerHeight, setContainerHeight] = useState(0);
 
-  // SafeAreaView 구성 요소가 렌더링되고 React Native 엔진에 의해 레이아웃이 계산된 후 정확한 높이를 logging
-  const handleLayout = (event: LayoutChangeEvent) => {
-    const { height } = event.nativeEvent.layout;
-    setContainerHeight(height);
-  };
+  // // SafeAreaView 구성 요소가 렌더링되고 React Native 엔진에 의해 레이아웃이 계산된 후 정확한 높이를 logging
+  // const handleLayout = (event: LayoutChangeEvent) => {
+  //   const { height } = event.nativeEvent.layout;
+  //   setContainerHeight(height);
+  // };
 
   const baseDate = new Date();
 
@@ -263,7 +261,9 @@ export default function Calendar() {
 
   return (
     <SafeAreaProvider>
-      <SafeAreaView style={styles.container} onLayout={handleLayout}>
+      {/* <SafeAreaView style={styles.container} onLayout={handleLayout}>
+       */}
+      <SafeAreaView style={styles.container}>
         {/* 월별 횡 스크롤 가능한 달력 */}
         <View style={styles.calendarWrapper}>
           <View style={styles.header}>
@@ -307,12 +307,16 @@ export default function Calendar() {
         </View>
         {/* ===== 투두 리스트 영역 ===== */}
         <View style={styles.todoContainer}>
+          <View style={styles.dateInfoContainer}>
+            <Text style={styles.dateInfo}>
+              {selectedDate.getDate()}일 {dayNames[selectedDate.getDay()]}
+            </Text>
+          </View>
           <CategoryTodoList
             todos={getTodosForSelectedDate()} // 선택된 날짜의 투두 전달
             onToggleTodo={toggleTodo} // 투두 토글 함수 전달
           />
         </View>
-        {/* 달력이랑 하단 todo listing 비율 3:4 */}
       </SafeAreaView>
       <QueryInput />
     </SafeAreaProvider>
@@ -428,5 +432,16 @@ const styles = StyleSheet.create({
     width: "100%", // 전체 너비 사용
     paddingHorizontal: 16,
     paddingTop: 24,
+  },
+  dateInfoContainer: {
+    flexDirection: "column",
+    alignItems: "flex-start",
+    gap: 16,
+  },
+  dateInfo: {
+    color: "#000",
+    fontSize: 20,
+    lineHeight: 20 * 1.2,
+    fontWeight: 600,
   },
 });

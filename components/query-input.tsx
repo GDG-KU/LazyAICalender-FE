@@ -149,12 +149,5 @@ const styles = StyleSheet.create({
     height: 44,
     borderRadius: 22,
     backgroundColor: "#1E1E1E",
-    // borderWidth: 0.857,
-    // borderColor: "#FFF",
-  },
-  plusText: {
-    fontSize: 50,
-    color: "white",
-    fontWeight: "bold",
   },
 });

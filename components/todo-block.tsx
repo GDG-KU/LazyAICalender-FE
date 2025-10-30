@@ -33,6 +33,7 @@ export default function TodoBlock({ todo, onToggleTodo }: TodoBlockProps) {
           todo.completed && styles.checkedBox, // 완료된 경우 추가 스타일 적용
         ]}
         onPress={() => onToggleTodo(todo.id)} // 클릭 시 해당 투두의 완료 상태 토글
+        hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
       >
         {/* 완료된 경우에만 체크마크(✓) 표시 */}
         {todo.completed && <Text style={styles.checkmark}>✓</Text>}

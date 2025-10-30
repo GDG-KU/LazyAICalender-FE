@@ -18,13 +18,17 @@ export interface TodoItem {
 interface TodoBlockProps {
   todo: TodoItem; // 표시할 투두 데이터 객체 (TodoItem 타입)
   onToggleTodo: (id: string) => void; // 체크박스 클릭 시 호출될 함수 (투두 id를 매개변수로 받음)
-  onLongPressTodo?: (id: string) => void;   // 해당 투두 길게 클릭 시 호출 함수
+  onLongPressTodo?: (id: string) => void; // 해당 투두 길게 클릭 시 호출 함수
 }
 
 // ===== TodoBlock 컴포넌트 (메인 컴포넌트) =====
 // 개별 투두 아이템을 표시하는 컴포넌트
 // props: todo(투두 데이터), onToggleTodo(완료 상태 토글 함수), onLongPressTodo(투두 길게 클릭 함수)
-export default function TodoBlock({ todo, onToggleTodo, onLongPressTodo }: TodoBlockProps) {
+export default function TodoBlock({
+  todo,
+  onToggleTodo,
+  onLongPressTodo,
+}: TodoBlockProps) {
   return (
     <Pressable
       onLongPress={() => onLongPressTodo?.(todo.id)}
@@ -34,25 +38,23 @@ export default function TodoBlock({ todo, onToggleTodo, onLongPressTodo }: TodoB
         {/* ===== 체크박스 영역 (터치 가능) ===== */}
         <Pressable
           style={[
-            styles.checkbox,
-            todo.completed && styles.checkedBox,
+            styles.checkbox, // 기본 체크박스 스타일
+            todo.completed && styles.checkedBox, // 완료된 경우 추가 스타일 적용
           ]}
-          onPress={() => onToggleTodo(todo.id)}
+          onPress={() => onToggleTodo(todo.id)} // 클릭 시 해당 투두의 완료 상태 토글
+          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
         >
+          {/* 완료된 경우에만 체크마크(✓) 표시 */}
           {todo.completed && <Text style={styles.checkmark}>✓</Text>}
         </Pressable>
 
         {/* ===== 투두 텍스트 영역 ===== */}
         <View style={styles.todoInfoWrapper}>
           <Text
-            style={[
-              styles.todoText,
-              todo.completed && styles.completedText,
-            ]}
+            style={[styles.todoText, todo.completed && styles.completedText]}
           >
             {todo.text}
           </Text>
-
           {/* ===== 시간 표시 영역 (조건부 렌더링) ===== */}
           {todo.time && <Text style={styles.timeText}>{todo.time}</Text>}
         </View>

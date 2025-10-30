@@ -61,10 +61,7 @@ export default function CategoryTodoList({
     return Object.entries(groupedTodos).map(([category, categoryTodos]) => (
       <View key={category} style={styles.categoryGroup}>
         {/* 카테고리 헤더 */}
-        <View style={styles.categoryHeader}>
-          <Text style={styles.categoryTitle}>{category}</Text>
-        </View>
-
+        <Text style={styles.categoryTitle}>{category}</Text>
         {/* 해당 카테고리의 투두들 */}
         {categoryTodos.map((todo) => (
           <TodoBlock 
@@ -83,7 +80,8 @@ export default function CategoryTodoList({
       contentContainerStyle={styles.todoListContainer}
       showsVerticalScrollIndicator={false}
     >
-      {renderTodosByCategory()} {/* 카테고리별 렌더링 함수 호출 */}
+      {/* 카테고리별 렌더링 함수 호출 */}
+      {renderTodosByCategory()}
     </ScrollView>
   );
 }
@@ -104,18 +102,12 @@ const styles = StyleSheet.create({
     alignItems: "stretch",
     gap: 8,
   },
-  // ===== 카테고리 헤더 스타일 =====
-  categoryHeader: {
-    paddingHorizontal: 16, // 좌우 패딩 (투두 블록과 동일하게 맞춤)
-    paddingVertical: 8, // 상하 패딩
-    marginBottom: 8, // 카테고리 제목과 투두들 사이의 여백
-  },
   // ===== 카테고리 제목 스타일 =====
   categoryTitle: {
-    fontSize: 18, // 폰트 크기 (투두 텍스트보다 크게)
-    fontWeight: "bold", // 볼드체 (굵은 글씨)
-    color: "#1F2937", // 진한 회색 텍스트
-    textTransform: "capitalize", // 첫 글자 대문자 변환
+    fontSize: 14, // 폰트 크기 (투두 텍스트보다 크게)
+    lineHeight: 14 * 1.2,
+    fontWeight: 500,
+    color: "#000",
   },
   // ===== 빈 상태 컨테이너 스타일 =====
   emptyStateContainer: {

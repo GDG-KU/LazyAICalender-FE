@@ -9,12 +9,22 @@ import React, { useRef, useState } from "react";
 import {
   Dimensions,
   FlatList,
+  Image,
+  LayoutChangeEvent,
+  Modal,
+  Pressable,
   StyleSheet,
   Text,
   View,
   ViewToken,
 } from "react-native";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import "react-native-get-random-values";
+import {
+  SafeAreaProvider,
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
+// import { v4 as uuidv4 } from "uuid";
 
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
@@ -38,6 +48,18 @@ const dayNames = ["일", "월", "화", "수", "목", "금", "토"];
 // 기준 월(오늘 날짜가 속한 달)의 index
 const INITIAL_INDEX = 1000;
 
+// YYYY-MM-DD (로컬 기준) 키 생성 유틸
+const DateKey = (d: Date) => {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${dd}`;
+};
+
+//임시로 투두 id 생성
+const genId = () =>
+  `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+
 export default function Calendar() {
   const [currentMonthIndex, setCurrentMonthIndex] = useState(INITIAL_INDEX);
 
@@ -48,9 +70,12 @@ export default function Calendar() {
   // ===== 날짜별 투두 데이터 관리 =====
   // 날짜를 키로 하고 해당 날짜의 투두 배열을 값으로 하는 객체
   // 형식: "2024-01-15" => [투두1, 투두2, ...]
+  const todayKey = DateKey(new Date());
+  const tomorrowKey = DateKey(new Date(Date.now() + 24 * 60 * 60 * 1000));
+
   const [todosByDate, setTodosByDate] = useState<Record<string, TodoItem[]>>({
     // 오늘 날짜의 샘플 투두들
-    [new Date().toISOString().split("T")[0]]: [
+    [todayKey]: [
       {
         id: "1", // 투두의 고유 식별자
         text: "프로젝트 회의 준비", // 투두 내용
@@ -81,7 +106,7 @@ export default function Calendar() {
       },
     ],
     // 내일 날짜의 샘플 투두들
-    [new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split("T")[0]]: [
+    [tomorrowKey]: [
       {
         id: "4",
         text: "병원 예약",
@@ -98,6 +123,11 @@ export default function Calendar() {
     ],
   });
 
+  // --- 액션 시트 & 확인 모달 상태 ---
+  const [actionSheetVisible, setActionSheetVisible] = useState(false);
+  const [confirmVisible, setConfirmVisible] = useState(false);
+  const [selectedTodoId, setSelectedTodoId] = useState<string | null>(null);
+
   // ===== 날짜 클릭 핸들러 함수 =====
   // 사용자가 달력의 날짜를 클릭했을 때 호출되는 함수
   // date: 클릭된 날짜 객체
@@ -109,7 +139,7 @@ export default function Calendar() {
   // 사용자가 투두의 체크박스를 클릭했을 때 호출되는 함수
   // id: 토글할 투두의 고유 식별자
   const toggleTodo = (id: string) => {
-    const dateKey = selectedDate.toISOString().split("T")[0]; // 선택된 날짜를 키로 변환
+    const dateKey = DateKey(selectedDate); // 선택된 날짜를 키로 변환
 
     setTodosByDate((prevTodosByDate) => ({
       ...prevTodosByDate,
@@ -121,10 +151,77 @@ export default function Calendar() {
     }));
   };
 
+  // ===== 길게 누르면 열리는 액션시트 =====
+  const openActionSheet = (id: string) => {
+    setSelectedTodoId(id);
+    setActionSheetVisible(true);
+  };
+  const closeActionSheet = () => setActionSheetVisible(false);
+
+  // ===== 액션시트에서 '삭제' 선택 → 확인 모달 열기 =====
+  const askDelete = () => {
+    closeActionSheet();
+    setConfirmVisible(true);
+  };
+
+  // ===== 확인 모달에서 '삭제' 확정 =====
+  const confirmDelete = () => {
+    if (!selectedTodoId) return;
+    deleteTodo(selectedTodoId);
+    setConfirmVisible(false);
+    setSelectedTodoId(null);
+  };
+
+  // ===== 액션시트에서 '복사' 선택 =====
+  const duplicateTodo = () => {
+    if (!selectedTodoId) return;
+    const dateKey = DateKey(selectedDate);
+    const original = (todosByDate[dateKey] || []).find(
+      (t) => t.id === selectedTodoId
+    );
+    if (!original) return;
+
+    const copy: TodoItem = { ...original, id: genId() };
+    setTodosByDate((prev) => ({
+      ...prev,
+      [dateKey]: [...(prev[dateKey] || []), copy],
+    }));
+    closeActionSheet();
+  };
+
+  // ===== 새 투두 추가 함수 =====
+  const addTodo = (text: string) => {
+    if (!text.trim()) return;
+
+    const dateKey = DateKey(selectedDate);
+
+    const newTodo: TodoItem = {
+      id: genId(),
+      text,
+      completed: false,
+      category: "기타", // 기본 카테고리
+    };
+
+    setTodosByDate((prev) => ({
+      ...prev,
+      [dateKey]: [...(prev[dateKey] || []), newTodo],
+    }));
+  };
+
+  // ===== 투두 삭제 함수 =====
+  const deleteTodo = (id: string) => {
+    const dateKey = DateKey(selectedDate);
+
+    setTodosByDate((prev) => ({
+      ...prev,
+      [dateKey]: prev[dateKey]?.filter((todo) => todo.id !== id) || [],
+    }));
+  };
+
   // ===== 선택된 날짜의 투두 가져오기 함수 =====
   // 현재 선택된 날짜에 해당하는 투두 배열을 반환하는 함수
   const getTodosForSelectedDate = (): TodoItem[] => {
-    const dateKey = selectedDate.toISOString().split("T")[0]; // 선택된 날짜를 키로 변환
+    const dateKey = DateKey(selectedDate); // 선택된 날짜를 키로 변환
     return todosByDate[dateKey] || []; // 해당 날짜의 투두가 없으면 빈 배열 반환
   };
 
@@ -315,10 +412,85 @@ export default function Calendar() {
           <CategoryTodoList
             todos={getTodosForSelectedDate()} // 선택된 날짜의 투두 전달
             onToggleTodo={toggleTodo} // 투두 토글 함수 전달
+            onDeleteTodo={deleteTodo} //투두 삭제
+            onLongPressTodo={openActionSheet} // 길게 클릭 시 시트 오픈
           />
         </View>
       </SafeAreaView>
-      <QueryInput />
+      <QueryInput onAddTodo={addTodo} />
+      {/* --- 하단 액션 시트: 삭제 / 복사 / 취소 --- */}
+      <Modal
+        transparent
+        visible={actionSheetVisible}
+        animationType="fade"
+        onRequestClose={closeActionSheet}
+      >
+        <Pressable style={sheetStyles.backdrop} onPress={closeActionSheet}>
+          <View style={sheetStyles.sheet}>
+            <Pressable style={sheetStyles.rowDanger} onPress={askDelete}>
+              <View style={sheetStyles.iconBox}>
+                <Image
+                  source={require("@/assets/icons/delete.png")}
+                  style={sheetStyles.iconDanger}
+                />
+              </View>
+              <Text style={sheetStyles.dangerText}>일정 삭제</Text>
+            </Pressable>
+
+            <Pressable style={sheetStyles.row} onPress={duplicateTodo}>
+              <View style={sheetStyles.iconBox}>
+                <Image
+                  source={require("@/assets/icons/copy.png")}
+                  style={sheetStyles.icon}
+                />
+              </View>
+              <Text style={sheetStyles.rowText}>일정 복사</Text>
+            </Pressable>
+
+            <Pressable style={sheetStyles.cancel} onPress={closeActionSheet}>
+              <Text style={sheetStyles.cancelText}>취소</Text>
+            </Pressable>
+          </View>
+        </Pressable>
+      </Modal>
+
+      {/* --- 삭제 확인 모달: 취소 / 삭제 --- */}
+      <Modal
+        transparent
+        visible={confirmVisible}
+        animationType="fade"
+        onRequestClose={() => setConfirmVisible(false)}
+      >
+        <View style={confirmStyles.center}>
+          <View style={confirmStyles.card}>
+            <View style={confirmStyles.iconCircle}>
+              <Image
+                source={require("@/assets/icons/delete.png")}
+                style={confirmStyles.icon}
+              />
+            </View>
+            <Text style={confirmStyles.title}>
+              1개의 일정을 삭제하시겠어요?
+            </Text>
+            <Text style={confirmStyles.sub}>삭제하면 복구가 불가능합니다.</Text>
+
+            <View style={confirmStyles.actions}>
+              <Pressable
+                style={confirmStyles.btnGhost}
+                onPress={() => setConfirmVisible(false)}
+              >
+                <Text style={confirmStyles.btnGhostText}>취소</Text>
+              </Pressable>
+              <Pressable
+                style={confirmStyles.btnDanger}
+                onPress={confirmDelete}
+              >
+                <Text style={confirmStyles.btnDangerText}>삭제</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaProvider>
   );
 }
@@ -444,4 +616,101 @@ const styles = StyleSheet.create({
     lineHeight: 20 * 1.2,
     fontWeight: 600,
   },
+});
+
+//모달 전용 스타일 함수
+const sheetStyles = StyleSheet.create({
+  backdrop: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.35)",
+    justifyContent: "flex-end",
+  },
+  sheet: {
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    paddingTop: 12,
+    paddingBottom: 24,
+  },
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+  },
+  rowDanger: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+  },
+  iconBox: { width: 28, alignItems: "center", marginRight: 12 },
+  icon: { width: 20, height: 20, tintColor: "#6B7280" },
+  iconDanger: { width: 20, height: 20, tintColor: "#EC221F" },
+  dangerText: { color: "#EC221F", fontSize: 16, fontWeight: "600" },
+  rowText: { color: "#111827", fontSize: 16, fontWeight: "600" },
+  cancel: {
+    marginTop: 8,
+    marginHorizontal: 12,
+    borderRadius: 12,
+    backgroundColor: "#F3F4F6",
+    alignItems: "center",
+    paddingVertical: 12,
+  },
+  cancelText: { fontSize: 16, color: "#111827", fontWeight: "600" },
+});
+
+const confirmStyles = StyleSheet.create({
+  center: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.35)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 24,
+  },
+  card: {
+    width: "100%",
+    maxWidth: 340,
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 20,
+    alignItems: "center",
+  },
+  iconCircle: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "#FFF1F2",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 12,
+  },
+  icon: { width: 22, height: 22, tintColor: "#EC221F" },
+  title: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#111827",
+    marginTop: 4,
+    textAlign: "center",
+  },
+  sub: { fontSize: 13, color: "#6B7280", marginTop: 6, textAlign: "center" },
+  actions: { flexDirection: "row", marginTop: 16, gap: 10 },
+  btnGhost: {
+    flex: 1,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: "#F3F4F6",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  btnGhostText: { fontSize: 15, fontWeight: "600", color: "#111827" },
+  btnDanger: {
+    flex: 1,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: "#F87171",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  btnDangerText: { fontSize: 15, fontWeight: "700", color: "#fff" },
 });

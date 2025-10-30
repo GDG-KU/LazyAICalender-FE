@@ -13,8 +13,12 @@ import { LinearGradient } from "expo-linear-gradient";
 import SendButton from "./send-button";
 
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+
 // 일정 추가용 / AI 상호작용 대화창 component
-export default function QueryInput() {
+interface QueryInputProps {
+  onAddTodo: (text: string) => void;
+}   
+export default function QueryInput({ onAddTodo }: QueryInputProps) {
   const [text, setText] = useState<string>("");
   const insets = useSafeAreaInsets();
   // TextInput의 변화를 감지해서 그 안의 내용을 text라는 state에 저장
@@ -24,6 +28,8 @@ export default function QueryInput() {
 
   // 전송 버튼 누를 시 trigger되는 함수, 추후 백엔드와 연결 필요
   const addSchedule = () => {
+    if (!text.trim()) return;
+    onAddTodo(text);
     console.log("schedule added");
     setText("");
     Keyboard.dismiss();
@@ -51,7 +57,7 @@ export default function QueryInput() {
             onSubmitEditing={addSchedule}
           />
           {/* 전송 버튼 */}
-          <Pressable style={styles.btnContainer}>
+          <Pressable style={styles.btnContainer} onPress={addSchedule}>
             {/* onPress prop 추가하기 */}
             <LinearGradient
               colors={["#F2A892", "#D79EBF", "#AC95F5"]}

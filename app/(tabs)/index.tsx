@@ -9,21 +9,22 @@ import React, { useRef, useState } from "react";
 import {
   Dimensions,
   FlatList,
+  Image,
   LayoutChangeEvent,
+  Modal,
+  Pressable,
   StyleSheet,
   Text,
   View,
   ViewToken,
-  Image,
 } from "react-native";
+import "react-native-get-random-values";
 import {
   SafeAreaProvider,
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
-import { Modal, Pressable, Alert } from "react-native";
-import "react-native-get-random-values";
-import { v4 as uuidv4 } from "uuid";
+// import { v4 as uuidv4 } from "uuid";
 
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
@@ -56,7 +57,8 @@ const DateKey = (d: Date) => {
 };
 
 //임시로 투두 id 생성
-const genId = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`;
+const genId = () =>
+  `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 
 export default function Calendar() {
   const [currentMonthIndex, setCurrentMonthIndex] = useState(INITIAL_INDEX);
@@ -119,7 +121,6 @@ export default function Calendar() {
   const [confirmVisible, setConfirmVisible] = useState(false);
   const [selectedTodoId, setSelectedTodoId] = useState<string | null>(null);
 
-
   // ===== 날짜 클릭 핸들러 함수 =====
   // 사용자가 달력의 날짜를 클릭했을 때 호출되는 함수
   // date: 클릭된 날짜 객체
@@ -168,13 +169,15 @@ export default function Calendar() {
   const duplicateTodo = () => {
     if (!selectedTodoId) return;
     const dateKey = DateKey(selectedDate);
-    const original = (todosByDate[dateKey] || []).find(t => t.id === selectedTodoId);
+    const original = (todosByDate[dateKey] || []).find(
+      (t) => t.id === selectedTodoId
+    );
     if (!original) return;
 
     const copy: TodoItem = { ...original, id: genId() };
-    setTodosByDate(prev => ({
+    setTodosByDate((prev) => ({
       ...prev,
-      [dateKey]: [ ...(prev[dateKey] || []), copy ],
+      [dateKey]: [...(prev[dateKey] || []), copy],
     }));
     closeActionSheet();
   };
@@ -408,61 +411,77 @@ export default function Calendar() {
       <QueryInput onAddTodo={addTodo} />
       {/* --- 하단 액션 시트: 삭제 / 복사 / 취소 --- */}
       <Modal
-      transparent
-      visible={actionSheetVisible}
-      animationType="fade"
-      onRequestClose={closeActionSheet}
+        transparent
+        visible={actionSheetVisible}
+        animationType="fade"
+        onRequestClose={closeActionSheet}
       >
         <Pressable style={sheetStyles.backdrop} onPress={closeActionSheet}>
           <View style={sheetStyles.sheet}>
             <Pressable style={sheetStyles.rowDanger} onPress={askDelete}>
               <View style={sheetStyles.iconBox}>
-                <Image source={require("@/assets/icons/delete.png")} style={sheetStyles.iconDanger} />
-                </View>
-                <Text style={sheetStyles.dangerText}>일정 삭제</Text>
-              </Pressable>
+                <Image
+                  source={require("@/assets/icons/delete.png")}
+                  style={sheetStyles.iconDanger}
+                />
+              </View>
+              <Text style={sheetStyles.dangerText}>일정 삭제</Text>
+            </Pressable>
 
-              <Pressable style={sheetStyles.row} onPress={duplicateTodo}>
-                <View style={sheetStyles.iconBox}>
-                  <Image source={require("@/assets/icons/copy.png")} style={sheetStyles.icon} />
-                </View>
-                <Text style={sheetStyles.rowText}>일정 복사</Text>
-              </Pressable>
+            <Pressable style={sheetStyles.row} onPress={duplicateTodo}>
+              <View style={sheetStyles.iconBox}>
+                <Image
+                  source={require("@/assets/icons/copy.png")}
+                  style={sheetStyles.icon}
+                />
+              </View>
+              <Text style={sheetStyles.rowText}>일정 복사</Text>
+            </Pressable>
 
-              <Pressable style={sheetStyles.cancel} onPress={closeActionSheet}>
-                <Text style={sheetStyles.cancelText}>취소</Text>
-              </Pressable>
+            <Pressable style={sheetStyles.cancel} onPress={closeActionSheet}>
+              <Text style={sheetStyles.cancelText}>취소</Text>
+            </Pressable>
+          </View>
+        </Pressable>
+      </Modal>
+
+      {/* --- 삭제 확인 모달: 취소 / 삭제 --- */}
+      <Modal
+        transparent
+        visible={confirmVisible}
+        animationType="fade"
+        onRequestClose={() => setConfirmVisible(false)}
+      >
+        <View style={confirmStyles.center}>
+          <View style={confirmStyles.card}>
+            <View style={confirmStyles.iconCircle}>
+              <Image
+                source={require("@/assets/icons/delete.png")}
+                style={confirmStyles.icon}
+              />
             </View>
-          </Pressable>
-        </Modal>
+            <Text style={confirmStyles.title}>
+              1개의 일정을 삭제하시겠어요?
+            </Text>
+            <Text style={confirmStyles.sub}>삭제하면 복구가 불가능합니다.</Text>
 
-        {/* --- 삭제 확인 모달: 취소 / 삭제 --- */}
-        <Modal
-          transparent
-          visible={confirmVisible}
-          animationType="fade"
-          onRequestClose={() => setConfirmVisible(false)}
-        >
-          <View style={confirmStyles.center}>
-            <View style={confirmStyles.card}>
-              <View style={confirmStyles.iconCircle}>
-                <Image source={require("@/assets/icons/delete.png")} style={confirmStyles.icon} />
-              </View>
-              <Text style={confirmStyles.title}>1개의 일정을 삭제하시겠어요?</Text>
-              <Text style={confirmStyles.sub}>삭제하면 복구가 불가능합니다.</Text>
-
-              <View style={confirmStyles.actions}>
-                <Pressable style={confirmStyles.btnGhost} onPress={() => setConfirmVisible(false)}>
-                  <Text style={confirmStyles.btnGhostText}>취소</Text>
-                </Pressable>
-                <Pressable style={confirmStyles.btnDanger} onPress={confirmDelete}>
-                  <Text style={confirmStyles.btnDangerText}>삭제</Text>
-                </Pressable>
-              </View>
+            <View style={confirmStyles.actions}>
+              <Pressable
+                style={confirmStyles.btnGhost}
+                onPress={() => setConfirmVisible(false)}
+              >
+                <Text style={confirmStyles.btnGhostText}>취소</Text>
+              </Pressable>
+              <Pressable
+                style={confirmStyles.btnDanger}
+                onPress={confirmDelete}
+              >
+                <Text style={confirmStyles.btnDangerText}>삭제</Text>
+              </Pressable>
             </View>
           </View>
-        </Modal>
-
+        </View>
+      </Modal>
     </SafeAreaProvider>
   );
 }
@@ -581,7 +600,11 @@ const styles = StyleSheet.create({
 
 //모달 전용 스타일 함수
 const sheetStyles = StyleSheet.create({
-  backdrop: { flex: 1, backgroundColor: "rgba(0,0,0,0.35)", justifyContent: "flex-end" },
+  backdrop: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.35)",
+    justifyContent: "flex-end",
+  },
   sheet: {
     backgroundColor: "#fff",
     borderTopLeftRadius: 16,
@@ -589,8 +612,18 @@ const sheetStyles = StyleSheet.create({
     paddingTop: 12,
     paddingBottom: 24,
   },
-  row: { flexDirection: "row", alignItems: "center", paddingHorizontal: 20, paddingVertical: 14 },
-  rowDanger: { flexDirection: "row", alignItems: "center", paddingHorizontal: 20, paddingVertical: 14 },
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+  },
+  rowDanger: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+  },
   iconBox: { width: 28, alignItems: "center", marginRight: 12 },
   icon: { width: 20, height: 20, tintColor: "#6B7280" },
   iconDanger: { width: 20, height: 20, tintColor: "#EC221F" },
@@ -608,15 +641,56 @@ const sheetStyles = StyleSheet.create({
 });
 
 const confirmStyles = StyleSheet.create({
-  center: { flex: 1, backgroundColor: "rgba(0,0,0,0.35)", justifyContent: "center", alignItems: "center", padding: 24 },
-  card: { width: "100%", maxWidth: 340, backgroundColor: "#fff", borderRadius: 16, padding: 20, alignItems: "center" },
-  iconCircle: { width: 48, height: 48, borderRadius: 24, backgroundColor: "#FFF1F2", alignItems: "center", justifyContent: "center", marginBottom: 12 },
+  center: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.35)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 24,
+  },
+  card: {
+    width: "100%",
+    maxWidth: 340,
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 20,
+    alignItems: "center",
+  },
+  iconCircle: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "#FFF1F2",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 12,
+  },
   icon: { width: 22, height: 22, tintColor: "#EC221F" },
-  title: { fontSize: 16, fontWeight: "700", color: "#111827", marginTop: 4, textAlign: "center" },
+  title: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#111827",
+    marginTop: 4,
+    textAlign: "center",
+  },
   sub: { fontSize: 13, color: "#6B7280", marginTop: 6, textAlign: "center" },
   actions: { flexDirection: "row", marginTop: 16, gap: 10 },
-  btnGhost: { flex: 1, height: 44, borderRadius: 12, backgroundColor: "#F3F4F6", alignItems: "center", justifyContent: "center" },
+  btnGhost: {
+    flex: 1,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: "#F3F4F6",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   btnGhostText: { fontSize: 15, fontWeight: "600", color: "#111827" },
-  btnDanger: { flex: 1, height: 44, borderRadius: 12, backgroundColor: "#F87171", alignItems: "center", justifyContent: "center" },
+  btnDanger: {
+    flex: 1,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: "#F87171",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   btnDangerText: { fontSize: 15, fontWeight: "700", color: "#fff" },
 });

@@ -1,16 +1,15 @@
 import CategoryTodoList from "@/components/category-todo-list";
+import CopyButton from "@/components/copy-button";
 import DayCell from "@/components/day-cell";
+import DeleteButton from "@/components/delete-button";
 import QueryInput from "@/components/query-input";
 import SettingButton from "@/components/setting-button";
 import { TodoItem } from "@/components/todo-block";
 import ViewConvertButton from "@/components/view-convert-button";
-
 import React, { useRef, useState } from "react";
 import {
   Dimensions,
   FlatList,
-  Image,
-  LayoutChangeEvent,
   Modal,
   Pressable,
   StyleSheet,
@@ -19,11 +18,7 @@ import {
   ViewToken,
 } from "react-native";
 import "react-native-get-random-values";
-import {
-  SafeAreaProvider,
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 // import { v4 as uuidv4 } from "uuid";
 
 const screenWidth = Dimensions.get("window").width;
@@ -429,24 +424,25 @@ export default function Calendar() {
           <View style={sheetStyles.sheet}>
             <Pressable style={sheetStyles.rowDanger} onPress={askDelete}>
               <View style={sheetStyles.iconBox}>
-                <Image
+                {/* <Image
                   source={require("@/assets/icons/delete.png")}
                   style={sheetStyles.iconDanger}
-                />
+                /> */}
+                <DeleteButton />
               </View>
               <Text style={sheetStyles.dangerText}>일정 삭제</Text>
             </Pressable>
 
             <Pressable style={sheetStyles.row} onPress={duplicateTodo}>
               <View style={sheetStyles.iconBox}>
-                <Image
+                {/* <Image
                   source={require("@/assets/icons/copy.png")}
                   style={sheetStyles.icon}
-                />
+                /> */}
+                <CopyButton />
               </View>
               <Text style={sheetStyles.rowText}>일정 복사</Text>
             </Pressable>
-
             <Pressable style={sheetStyles.cancel} onPress={closeActionSheet}>
               <Text style={sheetStyles.cancelText}>취소</Text>
             </Pressable>
@@ -464,10 +460,11 @@ export default function Calendar() {
         <View style={confirmStyles.center}>
           <View style={confirmStyles.card}>
             <View style={confirmStyles.iconCircle}>
-              <Image
+              {/* <Image
                 source={require("@/assets/icons/delete.png")}
                 style={confirmStyles.icon}
-              />
+              /> */}
+              <DeleteButton />
             </View>
             <Text style={confirmStyles.title}>
               1개의 일정을 삭제하시겠어요?
@@ -685,7 +682,7 @@ const confirmStyles = StyleSheet.create({
     justifyContent: "center",
     marginBottom: 12,
   },
-  icon: { width: 22, height: 22, tintColor: "#EC221F" },
+  // icon: { width: 22, height: 22, tintColor: "#EC221F" },
   title: {
     fontSize: 16,
     fontWeight: "700",

@@ -10,6 +10,8 @@ import TodoBlock, { TodoItem } from "./todo-block";
 interface CategoryTodoListProps {
   todos: TodoItem[]; // 표시할 투두 배열
   onToggleTodo: (id: string) => void; // 투두 완료 상태 토글 함수
+  onDeleteTodo?: (id: string) => void;     // 투두 삭제 함수
+  onLongPressTodo?: (id: string) => void; // 투두 길게 클릭 시 함수
 }
 
 // ===== 카테고리별 투두 그룹화 함수 =====
@@ -37,6 +39,7 @@ const groupTodosByCategory = (
 export default function CategoryTodoList({
   todos,
   onToggleTodo,
+  onLongPressTodo,
 }: CategoryTodoListProps) {
   // ===== 카테고리별 투두 렌더링 함수 =====
   // 카테고리별로 그룹화된 투두를 렌더링하는 함수
@@ -64,7 +67,12 @@ export default function CategoryTodoList({
 
         {/* 해당 카테고리의 투두들 */}
         {categoryTodos.map((todo) => (
-          <TodoBlock key={todo.id} todo={todo} onToggleTodo={onToggleTodo} />
+          <TodoBlock 
+            key={todo.id} 
+            todo={todo} 
+            onToggleTodo={onToggleTodo}
+            onLongPressTodo={onLongPressTodo}
+           />
         ))}
       </View>
     ));
@@ -93,7 +101,7 @@ const styles = StyleSheet.create({
   categoryGroup: {
     // marginBottom: 20, // 카테고리 그룹 간의 여백
     flexDirection: "column",
-    alignItems: "flex-start",
+    alignItems: "stretch",
     gap: 8,
   },
   // ===== 카테고리 헤더 스타일 =====

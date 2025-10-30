@@ -18,42 +18,46 @@ export interface TodoItem {
 interface TodoBlockProps {
   todo: TodoItem; // 표시할 투두 데이터 객체 (TodoItem 타입)
   onToggleTodo: (id: string) => void; // 체크박스 클릭 시 호출될 함수 (투두 id를 매개변수로 받음)
+  onLongPressTodo?: (id: string) => void;   // 해당 투두 길게 클릭 시 호출 함수
 }
 
 // ===== TodoBlock 컴포넌트 (메인 컴포넌트) =====
 // 개별 투두 아이템을 표시하는 컴포넌트
-// props: todo(투두 데이터), onToggleTodo(완료 상태 토글 함수)
-export default function TodoBlock({ todo, onToggleTodo }: TodoBlockProps) {
+// props: todo(투두 데이터), onToggleTodo(완료 상태 토글 함수), onLongPressTodo(투두 길게 클릭 함수)
+export default function TodoBlock({ todo, onToggleTodo, onLongPressTodo }: TodoBlockProps) {
   return (
-    <View style={styles.todoBlock}>
-      {/* ===== 체크박스 영역 (터치 가능) ===== */}
-      <Pressable
-        style={[
-          styles.checkbox, // 기본 체크박스 스타일
-          todo.completed && styles.checkedBox, // 완료된 경우 추가 스타일 적용
-        ]}
-        onPress={() => onToggleTodo(todo.id)} // 클릭 시 해당 투두의 완료 상태 토글
-      >
-        {/* 완료된 경우에만 체크마크(✓) 표시 */}
-        {todo.completed && <Text style={styles.checkmark}>✓</Text>}
-      </Pressable>
-
-      {/* ===== 투두 텍스트 영역 ===== */}
-      <View style={styles.todoInfoWrapper}>
-        <Text
+    <Pressable
+      onLongPress={() => onLongPressTodo?.(todo.id)}
+      delayLongPress={300} // 선택: 길게 누르기 지연 (ms)
+    >
+      <View style={styles.todoBlock}>
+        {/* ===== 체크박스 영역 (터치 가능) ===== */}
+        <Pressable
           style={[
-            styles.todoText, // 기본 투두 텍스트 스타일
-            todo.completed && styles.completedText, // 완료된 경우 취소선과 회색 텍스트 적용
+            styles.checkbox,
+            todo.completed && styles.checkedBox,
           ]}
+          onPress={() => onToggleTodo(todo.id)}
         >
-          {todo.text} {/* 투두 내용 표시 */}
-        </Text>
+          {todo.completed && <Text style={styles.checkmark}>✓</Text>}
+        </Pressable>
 
-        {/* ===== 시간 표시 영역 (조건부 렌더링) ===== */}
-        {/* time 속성이 있는 경우에만 시간 텍스트 표시 */}
-        {todo.time && <Text style={styles.timeText}>{todo.time}</Text>}
+        {/* ===== 투두 텍스트 영역 ===== */}
+        <View style={styles.todoInfoWrapper}>
+          <Text
+            style={[
+              styles.todoText,
+              todo.completed && styles.completedText,
+            ]}
+          >
+            {todo.text}
+          </Text>
+
+          {/* ===== 시간 표시 영역 (조건부 렌더링) ===== */}
+          {todo.time && <Text style={styles.timeText}>{todo.time}</Text>}
+        </View>
       </View>
-    </View>
+    </Pressable>
   );
 }
 
@@ -62,6 +66,7 @@ export default function TodoBlock({ todo, onToggleTodo }: TodoBlockProps) {
 const styles = StyleSheet.create({
   // ===== 투두 블록 전체 컨테이너 스타일 =====
   todoBlock: {
+    width: "100%",
     flexDirection: "row", // 자식 요소들(체크박스, 텍스트, 시간)을 가로로 배열
     alignItems: "center", // 자식 요소들을 세로 중앙 정렬
     backgroundColor: "#FFF", // 밝은 회색 배경색 (투두 아이템의 배경)

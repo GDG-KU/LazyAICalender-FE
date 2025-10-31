@@ -41,7 +41,8 @@ const monthNames = [
 const dayNames = ["일", "월", "화", "수", "목", "금", "토"];
 
 // 기준 월(오늘 날짜가 속한 달)의 index
-const INITIAL_INDEX = 1000;
+// 원래는 1000이었음
+const INITIAL_INDEX = 3;
 
 // YYYY-MM-DD (로컬 기준) 키 생성 유틸
 const DateKey = (d: Date) => {
@@ -233,9 +234,13 @@ export default function Calendar() {
 
   // 특정 인덱스에 대응되는 날짜 생성
   const getDateFromIndex = (index: number) => {
-    const date = new Date(baseDate);
-    date.setMonth(date.getMonth() + (index - INITIAL_INDEX));
-    return date;
+    // const date = new Date(baseDate);
+    // date.setMonth(date.getMonth() + (index - INITIAL_INDEX));
+    // return date;
+    const year = baseDate.getFullYear();
+    const month = baseDate.getMonth() + (index - INITIAL_INDEX);
+    // ✅ 항상 1일로 고정해 월 넘김 방지
+    return new Date(year, month, 1);
   };
 
   // 날짜 관련 함수
@@ -263,6 +268,7 @@ export default function Calendar() {
 
   // 달력 렌더링
   const renderCalendar = (date: Date) => {
+    // console.log(currentMonthIndex);
     const year = date.getFullYear();
     const month = date.getMonth();
     const calendarDate = date; // 달력이 표시하는 날짜 저장
@@ -366,7 +372,7 @@ export default function Calendar() {
             <SettingButton />
           </View>
           <FlatList
-            data={Array.from({ length: 2000 })}
+            data={Array.from({ length: 60 })}
             // horizontal: 횡 방향으로의 list 나열
             horizontal
             // pagingEnabled: 스와이프 시 전/후 월로 전환하는 props
@@ -425,9 +431,9 @@ export default function Calendar() {
             <Pressable style={sheetStyles.rowDanger} onPress={askDelete}>
               <View style={sheetStyles.iconBox}>
                 {/* <Image
-                  source={require("@/assets/icons/delete.png")}
-                  style={sheetStyles.iconDanger}
-                /> */}
+                    source={require("@/assets/icons/delete.png")}
+                    style={sheetStyles.iconDanger}
+                  /> */}
                 <DeleteButton />
               </View>
               <Text style={sheetStyles.dangerText}>일정 삭제</Text>
@@ -436,9 +442,9 @@ export default function Calendar() {
             <Pressable style={sheetStyles.row} onPress={duplicateTodo}>
               <View style={sheetStyles.iconBox}>
                 {/* <Image
-                  source={require("@/assets/icons/copy.png")}
-                  style={sheetStyles.icon}
-                /> */}
+                    source={require("@/assets/icons/copy.png")}
+                    style={sheetStyles.icon}
+                  /> */}
                 <CopyButton />
               </View>
               <Text style={sheetStyles.rowText}>일정 복사</Text>
@@ -461,9 +467,9 @@ export default function Calendar() {
           <View style={confirmStyles.card}>
             <View style={confirmStyles.iconCircle}>
               {/* <Image
-                source={require("@/assets/icons/delete.png")}
-                style={confirmStyles.icon}
-              /> */}
+                  source={require("@/assets/icons/delete.png")}
+                  style={confirmStyles.icon}
+                /> */}
               <DeleteButton />
             </View>
             <Text style={confirmStyles.title}>

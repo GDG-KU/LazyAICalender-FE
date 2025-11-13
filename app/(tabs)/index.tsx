@@ -239,7 +239,7 @@ export default function Calendar() {
     // return date;
     const year = baseDate.getFullYear();
     const month = baseDate.getMonth() + (index - INITIAL_INDEX);
-    // ✅ 항상 1일로 고정해 월 넘김 방지
+    // 항상 1일로 고정해 baseDate의 일자가 다른 달에 없을 때 다른 달로 넘어가는 것 방지
     return new Date(year, month, 1);
   };
 
@@ -417,6 +417,7 @@ export default function Calendar() {
             onLongPressTodo={openActionSheet} // 길게 클릭 시 시트 오픈
           />
         </View>
+        {/* <QueryInput onAddTodo={addTodo} /> */}
       </SafeAreaView>
       <QueryInput onAddTodo={addTodo} />
       {/* --- 하단 액션 시트: 삭제 / 복사 / 취소 --- */}
@@ -500,6 +501,7 @@ export default function Calendar() {
 
 const styles = StyleSheet.create({
   container: {
+    // 최외곽 component에 flex: 1을 줘서 가용 가능한 공간을 모두 차지하도록 확장함
     flex: 1,
     backgroundColor: "white",
     alignItems: "center",

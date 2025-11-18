@@ -8,7 +8,7 @@ import Svg, {
   Stop,
   SvgProps,
 } from "react-native-svg";
-const SendButton = (props: SvgProps) => (
+const SendIcon = (props: SvgProps) => (
   <Svg width={24} height={24} fill="none" {...props}>
     <Mask id="b" fill="#fff">
       <Path d="M11.106 4.789 4.052 18.897c-.395.789.35 1.665 1.192 1.402L11 18.5l1-6.5 1 6.5 5.756 1.799c.841.263 1.587-.613 1.192-1.402L12.894 4.789a1 1 0 0 0-1.788 0Z" />
@@ -38,4 +38,4 @@ const SendButton = (props: SvgProps) => (
     </Defs>
   </Svg>
 );
-export default SendButton;
+export default SendIcon;

@@ -1,6 +1,6 @@
 import * as React from "react";
 import Svg, { Path, SvgProps } from "react-native-svg";
-const CopyButton = (props: SvgProps) => (
+const CopyIcon = (props: SvgProps) => (
   <Svg width={24} height={24} fill="none" {...props}>
     <Path
       fill="#1F1F1F"
@@ -8,4 +8,4 @@ const CopyButton = (props: SvgProps) => (
     />
   </Svg>
 );
-export default CopyButton;
+export default CopyIcon;

@@ -1,7 +1,7 @@
 import * as React from "react";
 import Svg, { Path, SvgProps } from "react-native-svg";
 
-const SettingButton = (props: SvgProps) => (
+const SettingIcon = (props: SvgProps) => (
   <Svg
     // xmlns="http://www.w3.org/2000/svg"
     width={24}
@@ -16,4 +16,4 @@ const SettingButton = (props: SvgProps) => (
   </Svg>
 );
 
-export default SettingButton;
+export default SettingIcon;

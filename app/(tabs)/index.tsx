@@ -1,14 +1,13 @@
+import SettingIcon from "@/assets/icons/setting-icon.svg";
 import CategoryTodoList from "@/components/category-todo-list";
 import DayCell from "@/components/day-cell";
 import QueryInput from "@/components/query-input";
-import SettingButton from "@/components/setting-icon";
-import { TodoItem } from "@/components/todo-block";
-import ViewConvertButton from "@/components/view-convert-button";
-import React, { useRef, useState } from "react";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-
+import { TodoItem } from "@/components/todo-info-block";
+// import ViewConvertButton from "@/components/view-convert-button";
+import ViewConvertIcon from "@/assets/icons/view-convert-icon.svg";
 import TodoActionSheetModal from "@/components/todo-action-sheet-modal";
 import TodoDeleteConfirmModal from "@/components/todo-delete-confirm-modal";
+import React, { useRef, useState } from "react";
 import {
   Dimensions,
   FlatList,
@@ -18,7 +17,11 @@ import {
   ViewToken,
 } from "react-native";
 import "react-native-get-random-values";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaProvider,
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 // import { v4 as uuidv4 } from "uuid";
 
 const screenWidth = Dimensions.get("window").width;
@@ -367,10 +370,12 @@ export default function Calendar() {
         <View style={styles.calendarWrapper}>
           <View style={styles.header}>
             {/* <View style={styles.monthYearContainer}> */}
-            <ViewConvertButton />
+            {/* <ViewConvertButton /> */}
+            <ViewConvertIcon />
             <Text style={styles.monthText}>{currentMonthName}</Text>
             {/* </View> */}
-            <SettingButton />
+            {/* <SettingButton /> */}
+            <SettingIcon />
           </View>
           <FlatList
             data={Array.from({ length: 60 })}

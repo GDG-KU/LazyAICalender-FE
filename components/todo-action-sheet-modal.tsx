@@ -1,5 +1,5 @@
-import CopyIcon from "@/components/copy-icon";
-import DeleteIcon from "@/components/delete-icon";
+import CopyIcon from "@/assets/icons/copy-icon.svg";
+import DeleteIcon from "@/assets/icons/delete-icon.svg";
 import React from "react";
 import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
 

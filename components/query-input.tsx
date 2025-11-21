@@ -9,9 +9,8 @@ import {
   View,
 } from "react-native";
 
+import SendIcon from "@/assets/icons/send-icon.svg";
 import { LinearGradient } from "expo-linear-gradient";
-import SendButton from "./send-icon";
-
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // 일정 추가용 / AI 상호작용 대화창 component
@@ -80,7 +79,7 @@ export default function QueryInput({ onAddTodo }: QueryInputProps) {
                 style={styles.gradientBorder}
               >
                 <View style={styles.addButton}>
-                  <SendButton />
+                  <SendIcon />
                 </View>
               </LinearGradient>
             </Pressable>

@@ -10,7 +10,7 @@ import {
 } from "react-native";
 
 import { LinearGradient } from "expo-linear-gradient";
-import SendButton from "./send-button";
+import SendButton from "./send-icon";
 
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 

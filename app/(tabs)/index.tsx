@@ -1,17 +1,17 @@
 import CategoryTodoList from "@/components/category-todo-list";
-import CopyButton from "@/components/copy-button";
 import DayCell from "@/components/day-cell";
-import DeleteButton from "@/components/delete-button";
 import QueryInput from "@/components/query-input";
-import SettingButton from "@/components/setting-button";
+import SettingButton from "@/components/setting-icon";
 import { TodoItem } from "@/components/todo-block";
 import ViewConvertButton from "@/components/view-convert-button";
 import React, { useRef, useState } from "react";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+import TodoActionSheetModal from "@/components/todo-action-sheet-modal";
+import TodoDeleteConfirmModal from "@/components/todo-delete-confirm-modal";
 import {
   Dimensions,
   FlatList,
-  Modal,
-  Pressable,
   StyleSheet,
   Text,
   View,
@@ -63,12 +63,13 @@ export default function Calendar() {
   // 사용자가 클릭한 날짜를 저장하는 상태 (기본값: 오늘 날짜)
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
 
+  const insets = useSafeAreaInsets();
+
   // ===== 날짜별 투두 데이터 관리 =====
   // 날짜를 키로 하고 해당 날짜의 투두 배열을 값으로 하는 객체
   // 형식: "2024-01-15" => [투두1, 투두2, ...]
   const todayKey = DateKey(new Date());
   const tomorrowKey = DateKey(new Date(Date.now() + 24 * 60 * 60 * 1000));
-
   const [todosByDate, setTodosByDate] = useState<Record<string, TodoItem[]>>({
     // 오늘 날짜의 샘플 투두들
     [todayKey]: [
@@ -421,80 +422,19 @@ export default function Calendar() {
       </SafeAreaView>
       <QueryInput onAddTodo={addTodo} />
       {/* --- 하단 액션 시트: 삭제 / 복사 / 취소 --- */}
-      <Modal
-        transparent
+      <TodoActionSheetModal
         visible={actionSheetVisible}
-        animationType="fade"
-        onRequestClose={closeActionSheet}
-      >
-        <Pressable style={sheetStyles.backdrop} onPress={closeActionSheet}>
-          <View style={sheetStyles.sheet}>
-            <Pressable style={sheetStyles.rowDanger} onPress={askDelete}>
-              <View style={sheetStyles.iconBox}>
-                {/* <Image
-                    source={require("@/assets/icons/delete.png")}
-                    style={sheetStyles.iconDanger}
-                  /> */}
-                <DeleteButton />
-              </View>
-              <Text style={sheetStyles.dangerText}>일정 삭제</Text>
-            </Pressable>
-
-            <Pressable style={sheetStyles.row} onPress={duplicateTodo}>
-              <View style={sheetStyles.iconBox}>
-                {/* <Image
-                    source={require("@/assets/icons/copy.png")}
-                    style={sheetStyles.icon}
-                  /> */}
-                <CopyButton />
-              </View>
-              <Text style={sheetStyles.rowText}>일정 복사</Text>
-            </Pressable>
-            <Pressable style={sheetStyles.cancel} onPress={closeActionSheet}>
-              <Text style={sheetStyles.cancelText}>취소</Text>
-            </Pressable>
-          </View>
-        </Pressable>
-      </Modal>
+        onClose={closeActionSheet}
+        onAskDelete={askDelete}
+        onDuplicate={duplicateTodo}
+      />
 
       {/* --- 삭제 확인 모달: 취소 / 삭제 --- */}
-      <Modal
-        transparent
+      <TodoDeleteConfirmModal
         visible={confirmVisible}
-        animationType="fade"
-        onRequestClose={() => setConfirmVisible(false)}
-      >
-        <View style={confirmStyles.center}>
-          <View style={confirmStyles.card}>
-            <View style={confirmStyles.iconCircle}>
-              {/* <Image
-                  source={require("@/assets/icons/delete.png")}
-                  style={confirmStyles.icon}
-                /> */}
-              <DeleteButton />
-            </View>
-            <Text style={confirmStyles.title}>
-              1개의 일정을 삭제하시겠어요?
-            </Text>
-            <Text style={confirmStyles.sub}>삭제하면 복구가 불가능합니다.</Text>
-
-            <View style={confirmStyles.actions}>
-              <Pressable
-                style={confirmStyles.btnGhost}
-                onPress={() => setConfirmVisible(false)}
-              >
-                <Text style={confirmStyles.btnGhostText}>취소</Text>
-              </Pressable>
-              <Pressable
-                style={confirmStyles.btnDanger}
-                onPress={confirmDelete}
-              >
-                <Text style={confirmStyles.btnDangerText}>삭제</Text>
-              </Pressable>
-            </View>
-          </View>
-        </View>
-      </Modal>
+        onClose={() => setConfirmVisible(false)}
+        onConfirmDelete={confirmDelete}
+      />
     </SafeAreaProvider>
   );
 }
@@ -604,7 +544,8 @@ const styles = StyleSheet.create({
   },
   // ===== 투두 컨테이너 스타일 =====
   todoContainer: {
-    flex: 386, // 달력과 투두 영역의 비율 (달력:투두 = 6:7)
+    // flex: 386, // 달력과 투두 영역의 비율 (달력:투두 = 6:7)
+    flex: 300,
     backgroundColor: "#F5F5F5", // 회색 배경색 (달력 아래쪽 회색 영역)
     width: "100%", // 전체 너비 사용
     paddingHorizontal: 16,
@@ -621,6 +562,10 @@ const styles = StyleSheet.create({
     lineHeight: 20 * 1.2,
     fontWeight: 600,
   },
+  // bottomSafeArea: {
+  //   backgroundColor: "#6b7280",
+  //   height: insets.bottom,
+  // },
 });
 
 //모달 전용 스타일 함수

@@ -1,6 +1,5 @@
 import CategoryTodoList from "@/components/category-todo-list";
 import DayCell from "@/components/day-cell";
-import QueryInput from "@/components/query-input";
 import SettingButton from "@/components/setting-icon";
 import { TodoItem } from "@/components/todo-block";
 import ViewConvertButton from "@/components/view-convert-button";
@@ -9,6 +8,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import TodoActionSheetModal from "@/components/todo-action-sheet-modal";
 import TodoDeleteConfirmModal from "@/components/todo-delete-confirm-modal";
+import ChatBottomSheet from "@/components/ChatBottomSheet";
 import {
   Dimensions,
   FlatList,
@@ -138,10 +138,10 @@ export default function Calendar() {
   const toggleTodo = (id: string) => {
     const dateKey = DateKey(selectedDate); // 선택된 날짜를 키로 변환
 
-    setTodosByDate((prevTodosByDate) => ({
+    setTodosByDate((prevTodosByDate: Record<string, TodoItem[]>) => ({
       ...prevTodosByDate,
       [dateKey]:
-        prevTodosByDate[dateKey]?.map((todo) =>
+        prevTodosByDate[dateKey]?.map((todo: TodoItem) =>
           // 클릭된 투두의 id와 일치하는 경우에만 completed 상태를 반대로 변경
           todo.id === id ? { ...todo, completed: !todo.completed } : todo
         ) || [], // 해당 날짜에 투두가 없으면 빈 배열 반환
@@ -174,12 +174,12 @@ export default function Calendar() {
     if (!selectedTodoId) return;
     const dateKey = DateKey(selectedDate);
     const original = (todosByDate[dateKey] || []).find(
-      (t) => t.id === selectedTodoId
+      (t: TodoItem) => t.id === selectedTodoId
     );
     if (!original) return;
 
     const copy: TodoItem = { ...original, id: genId() };
-    setTodosByDate((prev) => ({
+    setTodosByDate((prev: Record<string, TodoItem[]>) => ({
       ...prev,
       [dateKey]: [...(prev[dateKey] || []), copy],
     }));
@@ -199,7 +199,7 @@ export default function Calendar() {
       category: "기타", // 기본 카테고리
     };
 
-    setTodosByDate((prev) => ({
+    setTodosByDate((prev: Record<string, TodoItem[]>) => ({
       ...prev,
       [dateKey]: [...(prev[dateKey] || []), newTodo],
     }));
@@ -209,9 +209,9 @@ export default function Calendar() {
   const deleteTodo = (id: string) => {
     const dateKey = DateKey(selectedDate);
 
-    setTodosByDate((prev) => ({
+    setTodosByDate((prev: Record<string, TodoItem[]>) => ({
       ...prev,
-      [dateKey]: prev[dateKey]?.filter((todo) => todo.id !== id) || [],
+      [dateKey]: prev[dateKey]?.filter((todo: TodoItem) => todo.id !== id) || [],
     }));
   };
 
@@ -381,7 +381,7 @@ export default function Calendar() {
             // initialScrollIndex: 현재 월 기준으로 초기 달이 보이도록 설정
             initialScrollIndex={INITIAL_INDEX}
             // getItemLayout: 각 달의 달력 가로 길이는 모두 동일하므로 미리 계산하여 계산량 줄임
-            getItemLayout={(_, index) => ({
+            getItemLayout={(_: any, index: number) => ({
               length: screenWidth,
               offset: screenWidth * index,
               index,
@@ -392,9 +392,9 @@ export default function Calendar() {
             // viewabilityConfig: item이 언제 viewable하다고 결정할 지 정하는 부분
             // 횡스크롤하여 50% 이상 보일 때 'viewable'하다고 설정
             viewabilityConfig={{ viewAreaCoveragePercentThreshold: 50 }}
-            keyExtractor={(_, index) => index.toString()}
+            keyExtractor={(_: any, index: number) => index.toString()}
             // renderItem: index 변화 시 실제 보일 내용을 렌더링하는 부분
-            renderItem={({ index }) => {
+            renderItem={({ index }: { index: number }) => {
               const date = getDateFromIndex(index);
               return (
                 <View style={{ width: screenWidth }}>
@@ -418,9 +418,8 @@ export default function Calendar() {
             onLongPressTodo={openActionSheet} // 길게 클릭 시 시트 오픈
           />
         </View>
-        {/* <QueryInput onAddTodo={addTodo} /> */}
+        <ChatBottomSheet onAddTodo={addTodo} />
       </SafeAreaView>
-      <QueryInput onAddTodo={addTodo} />
       {/* --- 하단 액션 시트: 삭제 / 복사 / 취소 --- */}
       <TodoActionSheetModal
         visible={actionSheetVisible}

@@ -61,7 +61,6 @@ const genId = () =>
 
 export default function Calendar() {
   const [currentMonthIndex, setCurrentMonthIndex] = useState(INITIAL_INDEX);
-
   // ===== 선택된 날짜 상태 관리 =====
   // 사용자가 클릭한 날짜를 저장하는 상태 (기본값: 오늘 날짜)
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -76,6 +75,7 @@ export default function Calendar() {
   const [todosByDate, setTodosByDate] = useState<Record<string, TodoItem[]>>({
     // 오늘 날짜의 샘플 투두들
     [todayKey]: [
+      // todayKey의 형식: 2025-11-21의 형식
       {
         id: "1", // 투두의 고유 식별자
         text: "프로젝트 회의 준비", // 투두 내용
@@ -271,7 +271,10 @@ export default function Calendar() {
   const currentMonthName = monthNames[currentMonthDate.getMonth()];
 
   // 달력 렌더링
-  const renderCalendar = (date: Date) => {
+  const renderCalendar = (
+    date: Date,
+    todosByDate: Record<string, TodoItem[]>
+  ) => {
     // console.log(currentMonthIndex);
     const year = date.getFullYear();
     const month = date.getMonth();
@@ -286,6 +289,12 @@ export default function Calendar() {
 
     // 이전 달의 날짜 component 추가
     for (let i = firstDay; i > 0; i--) {
+      const prevMonthDate = new Date(year, month, i - firstDay);
+      // 2. 키 생성
+      const dayKey = DateKey(prevMonthDate);
+      // 3. 해당 날짜의 할 일 배열 조회 (배열이 없으면 빈 배열 [] 반환)
+      const todos = todosByDate[dayKey] || []; // <--- todos 배열 자체를 가져옵니다.
+
       days.push(
         <DayCell
           key={`prev-${i}`}
@@ -296,12 +305,19 @@ export default function Calendar() {
           onDateClick={handleDateClick} // 날짜 클릭 핸들러 전달
           selectedDate={selectedDate} // 선택된 날짜 전달
           calendarDate={calendarDate} // 달력 날짜 전달
+          todos={todos}
         />
       );
     }
 
     // 현재 달 날짜 component 추가
     for (let i = 1; i <= daysInMonth; i++) {
+      const currentDate = new Date(year, month, i);
+      // 2. 키 생성
+      const dayKey = DateKey(currentDate);
+      // 3. 해당 날짜의 할 일 배열 조회
+      const todos = todosByDate[dayKey] || []; // <--- todos 배열 자체를 가져옵니다.
+
       const today = new Date();
       const isToday =
         i === today.getDate() &&
@@ -318,6 +334,7 @@ export default function Calendar() {
           onDateClick={handleDateClick} // 날짜 클릭 핸들러 전달
           selectedDate={selectedDate} // 선택된 날짜 전달
           calendarDate={calendarDate} // 달력 날짜 전달
+          todos={todos}
         />
       );
     }
@@ -327,6 +344,12 @@ export default function Calendar() {
       // 이번 달이 토요일로 끝나지 않으면
       const trailingDays = 6 - lastDay;
       for (let i = 1; i <= trailingDays; i++) {
+        const nextMonthDate = new Date(year, month + 1, i);
+        // 2. 키 생성
+        const dayKey = DateKey(nextMonthDate);
+        // 3. 해당 날짜의 할 일 배열 조회
+        const todos = todosByDate[dayKey] || []; // <--- todos 배열 자체를 가져옵니다.
+
         days.push(
           <DayCell
             key={`next-${i}`}
@@ -337,6 +360,7 @@ export default function Calendar() {
             onDateClick={handleDateClick} // 날짜 클릭 핸들러 전달
             selectedDate={selectedDate} // 선택된 날짜 전달
             calendarDate={calendarDate} // 달력 날짜 전달
+            todos={todos}
           />
         );
       }
@@ -403,7 +427,7 @@ export default function Calendar() {
               const date = getDateFromIndex(index);
               return (
                 <View style={{ width: screenWidth }}>
-                  {renderCalendar(date)}
+                  {renderCalendar(date, todosByDate)}
                 </View>
               );
             }}
@@ -457,7 +481,7 @@ const styles = StyleSheet.create({
   // calendarWrapper : todoContainer = 393: 386
   calendarWrapper: {
     // 월 표시와 달력 칸을 합쳐 비율 6:7로 결정
-    flex: 393,
+    flex: 500,
     width: "100%",
   },
   card: {

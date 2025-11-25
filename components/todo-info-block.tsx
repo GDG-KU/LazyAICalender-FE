@@ -24,7 +24,7 @@ interface TodoBlockProps {
 // ===== TodoBlock 컴포넌트 (메인 컴포넌트) =====
 // 개별 투두 아이템을 표시하는 컴포넌트
 // props: todo(투두 데이터), onToggleTodo(완료 상태 토글 함수), onLongPressTodo(투두 길게 클릭 함수)
-export default function TodoBlock({
+export default function TodoInfoBlock({
   todo,
   onToggleTodo,
   onLongPressTodo,

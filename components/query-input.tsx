@@ -2,8 +2,6 @@
 import React, { useState } from "react";
 import {
   Keyboard,
-  KeyboardAvoidingView,
-  Platform,
   Pressable,
   StyleSheet,
   TextInput,
@@ -40,11 +38,12 @@ export default function QueryInput({ onAddTodo, onExpand }: QueryInputProps) {
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    <View
       style={{
         paddingBottom: 8 + insets.bottom,
         paddingHorizontal: 16,
+        paddingTop: 5,
+        backgroundColor: "#111111",
       }}
     >
       <View style={styles.styleWrapper}>
@@ -76,7 +75,7 @@ export default function QueryInput({ onAddTodo, onExpand }: QueryInputProps) {
           </Pressable>
         </Pressable>
       </View>
-    </KeyboardAvoidingView>
+    </View>
   );
 }
 

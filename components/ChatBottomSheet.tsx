@@ -1,11 +1,12 @@
 // components/ChatBottomSheet.tsx
 import React, { useState, useEffect, useMemo } from "react";
-import { StyleSheet, View, Text, useWindowDimensions, LayoutChangeEvent } from "react-native";
+import { StyleSheet, View, Text, useWindowDimensions, LayoutChangeEvent, Keyboard } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
   interpolate,
+  withTiming,
 } from "react-native-reanimated";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -25,11 +26,11 @@ export default function ChatBottomSheet({ onAddTodo }: ChatBottomSheetProps) {
   // 스냅 포인트를 메모이제이션하여 불필요한 재계산 방지
   // translateY는 시트의 상단 위치
   // FULL: translateY = 0, sheetHeight = SCREEN_HEIGHT (전체 화면)
-  // MID: translateY = SCREEN_HEIGHT * 0.45, sheetHeight = SCREEN_HEIGHT * 0.55 (45%부터 하단까지)
+  // MID: translateY = SCREEN_HEIGHT * 0.33, sheetHeight = SCREEN_HEIGHT * 0.67 (33%부터 하단까지)
   // MIN: translateY = SCREEN_HEIGHT - queryInputHeight, sheetHeight = queryInputHeight (쿼리 인풋만)
   const snapPoints = useMemo(() => {
     const FULL = 0;
-    const MID = SCREEN_HEIGHT * 0.45;
+    const MID = SCREEN_HEIGHT * 0.33;
     return { FULL, MID };
   }, [SCREEN_HEIGHT]);
 
@@ -58,6 +59,8 @@ export default function ChatBottomSheet({ onAddTodo }: ChatBottomSheetProps) {
   // 초기값 설정
   const sheetHeight = useSharedValue(80); // 초기값을 쿼리 인풋 높이로 설정
   const startY = useSharedValue(0);
+  const queryInputTranslateY = useSharedValue(0); // 쿼리 인풋의 translateY 값
+  const originalSheetHeight = useSharedValue(80); // 키보드가 올라오기 전의 원래 높이 저장
 
   // SCREEN_HEIGHT가 처음 설정될 때 초기 위치 업데이트
   useEffect(() => {
@@ -79,6 +82,104 @@ export default function ChatBottomSheet({ onAddTodo }: ChatBottomSheetProps) {
       sheetHeight.value = queryInputHeight; // 정확히 queryInputHeight로 설정
     }
   }, [queryInputHeight, SCREEN_HEIGHT]);
+
+  // 키보드 이벤트 처리
+  useEffect(() => {
+    const keyboardWillShow = Keyboard.addListener(
+      'keyboardWillShow',
+      (e) => {
+        const keyboardHeight = e.endCoordinates.height;
+        const minHeight = queryInputHeightShared.value;
+        const currentHeight = sheetHeight.value;
+        
+        // 현재 높이가 최소 사이즈인지 확인 (약간의 여유를 둠)
+        const isMinSize = Math.abs(currentHeight - minHeight) < 10;
+        
+        if (isMinSize) {
+          // 최소 사이즈일 때는 원래 높이를 저장하고 챗바텀시트 높이를 키보드 높이만큼 늘림
+          originalSheetHeight.value = currentHeight;
+          sheetHeight.value = withTiming(currentHeight + keyboardHeight, {
+            duration: e.duration || 250,
+          });
+        }
+        
+        // 키보드 높이만큼 쿼리 인풋을 위로 이동
+        queryInputTranslateY.value = withTiming(-keyboardHeight, {
+          duration: e.duration || 250,
+        });
+      }
+    );
+    const keyboardWillHide = Keyboard.addListener(
+      'keyboardWillHide',
+      (e) => {
+        // 키보드가 사라지면 원래 위치로
+        queryInputTranslateY.value = withTiming(0, {
+          duration: e.duration || 250,
+        });
+        
+        // 최소 사이즈였으면 원래 높이로 복원
+        const minHeight = queryInputHeightShared.value;
+        const currentHeight = sheetHeight.value;
+        const isMinSize = Math.abs(originalSheetHeight.value - minHeight) < 10;
+        
+        if (isMinSize && originalSheetHeight.value > 0) {
+          sheetHeight.value = withTiming(originalSheetHeight.value, {
+            duration: e.duration || 250,
+          });
+        }
+      }
+    );
+    const keyboardDidShow = Keyboard.addListener(
+      'keyboardDidShow',
+      (e) => {
+        const keyboardHeight = e.endCoordinates.height;
+        const minHeight = queryInputHeightShared.value;
+        const currentHeight = sheetHeight.value;
+        
+        // 현재 높이가 최소 사이즈인지 확인
+        const isMinSize = Math.abs(currentHeight - minHeight) < 10;
+        
+        if (isMinSize) {
+          // 최소 사이즈일 때는 원래 높이를 저장하고 챗바텀시트 높이를 키보드 높이만큼 늘림
+          originalSheetHeight.value = currentHeight;
+          sheetHeight.value = withTiming(currentHeight + keyboardHeight, {
+            duration: 250,
+          });
+        }
+        
+        // Android용
+        queryInputTranslateY.value = withTiming(-keyboardHeight, {
+          duration: 250,
+        });
+      }
+    );
+    const keyboardDidHide = Keyboard.addListener(
+      'keyboardDidHide',
+      () => {
+        // Android용
+        queryInputTranslateY.value = withTiming(0, {
+          duration: 250,
+        });
+        
+        // 최소 사이즈였으면 원래 높이로 복원
+        const minHeight = queryInputHeightShared.value;
+        const isMinSize = Math.abs(originalSheetHeight.value - minHeight) < 10;
+        
+        if (isMinSize && originalSheetHeight.value > 0) {
+          sheetHeight.value = withTiming(originalSheetHeight.value, {
+            duration: 250,
+          });
+        }
+      }
+    );
+
+    return () => {
+      keyboardWillShow.remove();
+      keyboardWillHide.remove();
+      keyboardDidShow.remove();
+      keyboardDidHide.remove();
+    };
+  }, [queryInputTranslateY, queryInputHeightShared, sheetHeight, originalSheetHeight]);
 
   const panGesture = Gesture.Pan()
     .onStart(() => {
@@ -154,6 +255,11 @@ export default function ChatBottomSheet({ onAddTodo }: ChatBottomSheetProps) {
     return { opacity };
   });
 
+  // 쿼리 인풋의 translateY 애니메이션 스타일
+  const queryInputAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: queryInputTranslateY.value }],
+  }));
+
   // 아래바를 탭/포커스했을 때 중간 이상으로 올리기
   const expandToMid = () => {
     const midHeight = SCREEN_HEIGHT - MID;
@@ -193,15 +299,18 @@ export default function ChatBottomSheet({ onAddTodo }: ChatBottomSheetProps) {
           </Animated.View>
 
           {/* 항상 맨 아래에 붙어있는 입력창 */}
-          <View 
+          <Animated.View 
             onLayout={handleQueryInputLayout}
-            style={styles.queryInputContainer}
+            style={[
+              styles.queryInputContainer,
+              queryInputAnimatedStyle,
+            ]}
           >
             <QueryInput
               onAddTodo={onAddTodo}
               onExpand={expandToMid}
             />
-          </View>
+          </Animated.View>
         </View>
       </Animated.View>
     </GestureDetector>
@@ -221,7 +330,6 @@ const styles = StyleSheet.create({
   },
   sheetContent: {
     flex: 1,
-    justifyContent: "flex-end",
   },
   handleWrapper: {
     paddingTop: 8,
@@ -264,8 +372,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   queryInputContainer: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
     width: "100%",
-    overflow: "hidden",
-    paddingTop: 5, // 쿼리인풋과 시트 상단 사이 여백
   },
 });

@@ -10,7 +10,6 @@ import React, { useRef, useState } from "react";
 import ChatBottomSheet from "@/components/chat-bottom-sheet";
 import TodoActionSheetModal from "@/components/todo-action-sheet-modal";
 import TodoDeleteConfirmModal from "@/components/todo-delete-confirm-modal";
-import React, { useRef, useState } from "react";
 import {
   Dimensions,
   FlatList,
@@ -64,6 +63,7 @@ const genId = () =>
 
 export default function Calendar() {
   const [currentMonthIndex, setCurrentMonthIndex] = useState(INITIAL_INDEX);
+
   // ===== 선택된 날짜 상태 관리 =====
   // 사용자가 클릭한 날짜를 저장하는 상태 (기본값: 오늘 날짜)
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -481,7 +481,7 @@ const styles = StyleSheet.create({
   // calendarWrapper : todoContainer = 393: 386
   calendarWrapper: {
     // 월 표시와 달력 칸을 합쳐 비율 6:7로 결정
-    flex: 500,
+    flex: 393,
     width: "100%",
   },
   card: {

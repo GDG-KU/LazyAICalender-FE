@@ -19,6 +19,7 @@ interface DayCellProps {
   selectedDate?: Date;
   calendarDate?: Date;
   todos: TodoItem[];
+  isSunday: boolean;
 }
 
 export default function DayCell({
@@ -30,6 +31,7 @@ export default function DayCell({
   selectedDate,
   calendarDate,
   todos,
+  isSunday,
 }: DayCellProps) {
   // 클릭 핸들러
   const handlePress = () => {
@@ -118,6 +120,7 @@ export default function DayCell({
                 : styles.dayTextInactive,
               isToday && styles.todayText,
               isSelected && styles.selectedText,
+              isSunday && styles.sundayText,
             ]}
           >
             {monthPosition === "prev" ? daysInPrevMonth - date + 1 : date}
@@ -145,7 +148,8 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start", // 위쪽부터 쌓기
     alignItems: "center",
     borderTopWidth: 1,
-    borderTopColor: "#D9D9D9",
+    // borderTopColor: "#D9D9D9"
+    borderTopColor: "rgba(255, 255, 255, 0.1)",
     paddingHorizontal: 2,
   },
   dayContent: {
@@ -176,19 +180,23 @@ const styles = StyleSheet.create({
   selectedText: {
     color: "white",
   },
+  sundayText: {
+    color: "#EC221F",
+  },
   dayText: {
     fontSize: 11,
     lineHeight: 11 * 1.4,
     textAlign: "center",
     fontWeight: "400",
-    color: "#1E1E1E",
+    color: "white",
   },
   dayTextInactive: {
     fontSize: 11,
     lineHeight: 11 * 1.4,
     textAlign: "center",
     fontWeight: "400",
-    color: "#9ca3af",
+    color: "white",
+    opacity: 0.2,
   },
   todoContainer: {
     flex: 1, // 남은 공간 모두 차지

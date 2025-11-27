@@ -481,7 +481,7 @@ const styles = StyleSheet.create({
   // calendarWrapper : todoContainer = 393: 386
   calendarWrapper: {
     // 월 표시와 달력 칸을 합쳐 비율 6:7로 결정
-    flex: 500,
+    flex: 393,
     width: "100%",
   },
   card: {

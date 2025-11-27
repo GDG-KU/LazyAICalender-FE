@@ -26,7 +26,7 @@ export default function TabLayout() {
           ),
         }}
       />
-      <Tabs.Screen
+      {/* <Tabs.Screen
         name="todo"
         options={{
           title: "To Do",
@@ -43,7 +43,7 @@ export default function TabLayout() {
             <IconSymbol size={24} name="clock" color={color} />
           ),
         }}
-      />
+      /> */}
     </Tabs>
   );
 }

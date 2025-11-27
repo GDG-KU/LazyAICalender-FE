@@ -53,22 +53,45 @@ export default function DayCell({
     monthPosition === "current";
 
   const todosCnt = todos?.length ?? 0;
-  // if (todos != undefined) console.log(todos[0], todos.length, "\n");
-  // 위 로직으로 todos와 length를 받아올 수 있음
-
+  // console.log("Date: ", date, "todosCnt: ", todosCnt, "\n");
   const renderTodos = () => {
     if (todosCnt === 0) return null;
     else if (todosCnt <= 3) {
-      todos.map((todo) => {
-        <TodoCalendarBlock />;
-        // {"category": "건강", "completed": false, "id": "4", "text": "병원 예약", "time": "오전 10시"}
-        // todo 색상 list
-        // "#AC95F5"
-        // "#ED5755"
-        // "#FDBEAD"
-        // "#14AE5D"
-      });
+      // todosCnt: 2까지는 확인한 상황
+
+      // return todos.map((todo: TodoItem) => (
+      //   <TodoCalendarBlock
+      //     key={todo.id}
+      //     text={todo.text}
+      //     // completed={todo.completed}
+      //   />
+      //   // {"category": "건강", "completed": false, "id": "4", "text": "병원 예약", "time": "오전 10시"}
+      //   // todo 색상 list
+      //   // "#AC95F5"
+      //   // "#ED5755"
+      //   // "#FDBEAD"
+      //   // "#14AE5D"
+      // ));
+
+      const filled = todos.map((todo) => (
+        <TodoCalendarBlock key={todo.id} text={todo.text} />
+      ));
+
+      // Add empty blocks
+      const emptyCount = 3 - todosCnt;
+      const emptyBlocks = Array.from({ length: emptyCount }).map((_, idx) => (
+        <TodoCalendarBlock key={`empty-${idx}`} text="" />
+      ));
+
+      return [...filled, ...emptyBlocks];
     } else {
+      return (
+        <>
+          <TodoCalendarBlock key={todos[0].id} text={todos[0].text} />
+          <TodoCalendarBlock key={todos[1].id} text={todos[1].text} />
+          <TodoCalendarBlock key={"additional"} text={`+${todosCnt - 2}`} />
+        </>
+      );
     }
   };
 
@@ -110,7 +133,7 @@ export default function DayCell({
               <TodoCalendarBlock />
             </>
           ) : null} */}
-          {/* {renderTodos()} */}
+          {renderTodos()}
         </View>
       </View>
     </Pressable>
@@ -177,7 +200,7 @@ const styles = StyleSheet.create({
     width: "100%",
     justifyContent: "center",
     alignItems: "center",
-    // marginTop: 4,
+    marginTop: 2,
     // backgroundColor: "#13579A",
   },
 });

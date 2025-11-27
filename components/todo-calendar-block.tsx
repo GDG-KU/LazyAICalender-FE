@@ -1,12 +1,22 @@
 import { StyleSheet, Text, View } from "react-native";
-export default function TodoCalendarBlock() {
+
+export interface TodoCalendarBlockProps {
+  text: string;
+}
+
+export default function TodoCalendarBlock({ text }: TodoCalendarBlockProps) {
   return (
-    <View style={styles.todoBlock}>
-      <Text style={styles.todoText}>Yap!</Text>
-      {/* 글자가 넘어가는 것 자체는 구현함, 그런데 이제 3개 이상의 content가 들어올 때가 관건 */}
+    <View
+      style={[
+        styles.todoBlock,
+        { backgroundColor: text === "" ? "#FFF" : "#FDBEAD" },
+      ]}
+    >
+      <Text style={styles.todoText}>{text}</Text>
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   todoBlock: {
     width: "92%",

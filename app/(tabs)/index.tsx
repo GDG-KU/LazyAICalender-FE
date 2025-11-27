@@ -43,7 +43,8 @@ const monthNames = [
   "11월",
   "12월",
 ];
-const dayNames = ["일", "월", "화", "수", "목", "금", "토"];
+const dayNamesEng = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+const dayNamesKor = ["일", "월", "화", "수", "목", "금", "토", "일"];
 
 // 기준 월(오늘 날짜가 속한 달)의 index
 // 원래는 1000이었음
@@ -294,10 +295,10 @@ export default function Calendar() {
     // 이전 달의 날짜 component 추가
     for (let i = firstDay; i > 0; i--) {
       const prevMonthDate = new Date(year, month, i - firstDay);
-      // 2. 키 생성
       const dayKey = DateKey(prevMonthDate);
       // 3. 해당 날짜의 할 일 배열 조회 (배열이 없으면 빈 배열 [] 반환)
       const todos = todosByDate[dayKey] || []; // <--- todos 배열 자체를 가져옵니다.
+      const isSunday = prevMonthDate.getDay() === 0;
       days.push(
         <DayCell
           key={`prev-${i}`}
@@ -309,6 +310,7 @@ export default function Calendar() {
           selectedDate={selectedDate} // 선택된 날짜 전달
           calendarDate={calendarDate} // 달력 날짜 전달
           todos={todos}
+          isSunday={isSunday}
         />
       );
     }
@@ -325,7 +327,7 @@ export default function Calendar() {
         i === today.getDate() &&
         month === today.getMonth() &&
         year === today.getFullYear();
-
+      const isSunday = currentDate.getDay() === 0;
       days.push(
         <DayCell
           key={`current-${i}`}
@@ -337,6 +339,7 @@ export default function Calendar() {
           selectedDate={selectedDate} // 선택된 날짜 전달
           calendarDate={calendarDate} // 달력 날짜 전달
           todos={todos}
+          isSunday={isSunday}
         />
       );
     }
@@ -351,6 +354,7 @@ export default function Calendar() {
         const dayKey = DateKey(nextMonthDate);
         // 3. 해당 날짜의 할 일 배열 조회
         const todos = todosByDate[dayKey] || []; // <--- todos 배열 자체를 가져옵니다.
+        const isSunday = nextMonthDate.getDay() === 0;
         days.push(
           <DayCell
             key={`next-${i}`}
@@ -362,6 +366,7 @@ export default function Calendar() {
             selectedDate={selectedDate} // 선택된 날짜 전달
             calendarDate={calendarDate} // 달력 날짜 전달
             todos={todos}
+            isSunday={isSunday}
           />
         );
       }
@@ -371,10 +376,10 @@ export default function Calendar() {
     return (
       <View style={styles.card}>
         <View style={styles.dayNameContainer}>
-          {dayNames.map((day) => (
+          {dayNamesEng.map((day) => (
             <View key={day} style={styles.dayNameCell}>
               <Text
-                style={[styles.dayNameText, day === "일" && styles.sundayText]}
+                style={[styles.dayNameText, day === "SUN" && styles.sundayText]}
               >
                 {day}
               </Text>
@@ -386,19 +391,30 @@ export default function Calendar() {
     );
   };
 
+  const [wrapperWidth, setWrapperWidth] = useState(screenWidth * 0.9179);
+
   return (
     <SafeAreaProvider>
       {/* <SafeAreaView style={styles.container} onLayout={handleLayout}>
        */}
       <SafeAreaView style={styles.container}>
         {/* 월별 횡 스크롤 가능한 달력 */}
-        <View style={styles.calendarWrapper}>
+        <View
+          style={styles.calendarWrapper}
+          // onLayout={(e) => setWrapperWidth(e.nativeEvent.layout.width)}
+        >
           <View style={styles.header}>
             {/* <View style={styles.monthYearContainer}> */}
-            <ViewConvertIcon />
-            <Text style={styles.monthText}>{currentMonthName}</Text>
+            <View style={styles.headerIconsContainer}>
+              <ViewConvertIcon />
+            </View>
+            <View style={styles.monthTextContainer}>
+              <Text style={styles.monthText}>{currentMonthName}</Text>
+            </View>
             {/* </View> */}
-            <SettingIcon />
+            <View style={styles.headerIconsContainer}>
+              <SettingIcon />
+            </View>
           </View>
           <FlatList
             data={Array.from({ length: 60 })}
@@ -425,7 +441,8 @@ export default function Calendar() {
             renderItem={({ index }: { index: number }) => {
               const date = getDateFromIndex(index);
               return (
-                <View style={{ width: screenWidth }}>
+                // <View style={{ width: screenWidth }}>
+                <View style={{ width: wrapperWidth }}>
                   {renderCalendar(date, todosByDate)}
                 </View>
               );
@@ -436,7 +453,8 @@ export default function Calendar() {
         <View style={styles.todoContainer}>
           <View style={styles.dateInfoContainer}>
             <Text style={styles.dateInfo}>
-              {selectedDate.getDate()}일 {dayNames[selectedDate.getDay()]}
+              {selectedDate.getDate()}일 {dayNamesKor[selectedDate.getDay()]}
+              요일
             </Text>
           </View>
           <CategoryTodoList
@@ -472,7 +490,7 @@ const styles = StyleSheet.create({
   container: {
     // 최외곽 component에 flex: 1을 줘서 가용 가능한 공간을 모두 차지하도록 확장함
     flex: 1,
-    backgroundColor: "white",
+    backgroundColor: "#1E1E1E",
     alignItems: "center",
     // justifyContent: "center",
     // 5주, 6주에 따른 높이가 다르기 때문에
@@ -482,15 +500,19 @@ const styles = StyleSheet.create({
   calendarWrapper: {
     // 월 표시와 달력 칸을 합쳐 비율 6:7로 결정
     flex: 393,
-    width: "100%",
+    width: "91.79%",
+
+    alignSelf: "center",
+    // alignContent: "center",
+    gap: 11,
   },
   card: {
     // 달력이랑 todo 비율 맞추기, 이걸 지워야 DayCell이 세로로 꽉 차게 할 수 있다?
     // 확실하지 않음
     flex: 1,
 
-    backgroundColor: "white",
-    // borderRadius: 24,
+    backgroundColor: "#434343",
+    // borderRadius: 16,
     // shadowColor: "#000",
     // shadowOffset: { width: 0, height: 4 },
     // shadowOpacity: 0.1,
@@ -498,15 +520,28 @@ const styles = StyleSheet.create({
     // elevation: 8,
     // paddingVertical: 12,
     paddingHorizontal: 16,
-    // paddingHorizontal: 6,
-    width: screenWidth,
+
+    // width: screenWidth,
+    width: "100%",
+
+    // alignSelf: "center",
+    // width: "100%",
     maxWidth: 600,
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 16,
+    // paddingHorizontal: 16,
+    width: "100%",
+  },
+  headerIconsContainer: {
+    height: 29,
+    width: 29,
+    borderRadius: 14.5,
+    backgroundColor: "#5A5A5A",
+    justifyContent: "center",
+    alignItems: "center",
   },
   monthYearContainer: {
     alignItems: "center",
@@ -517,7 +552,14 @@ const styles = StyleSheet.create({
     fontSize: 24,
     lineHeight: 24 * 1.2,
     fontWeight: "600",
-    color: "#000",
+    color: "#FFF",
+  },
+  monthTextContainer: {
+    height: "100%",
+    width: "32.49%",
+    backgroundColor: "#5A5A5A",
+    alignItems: "center",
+    borderRadius: 17,
   },
   // yearText: {
   //   fontSize: 18,
@@ -541,12 +583,13 @@ const styles = StyleSheet.create({
     width: "14.28%",
   },
   dayNameText: {
-    fontSize: 14,
-    lineHeight: 14 * 1.2,
+    fontSize: 11,
+    lineHeight: 11 * 1.2,
     fontWeight: "500",
-    color: "#1E1E1E",
-    width: 13,
+    color: "#FFF",
+    // width: 13,
     height: 17,
+    opacity: 0.5,
   },
   calendarGrid: {
     // added
@@ -575,7 +618,7 @@ const styles = StyleSheet.create({
   todoContainer: {
     // flex: 386, // 달력과 투두 영역의 비율 (달력:투두 = 6:7)
     flex: 300,
-    backgroundColor: "#F5F5F5", // 회색 배경색 (달력 아래쪽 회색 영역)
+    backgroundColor: "#1E1E1E", // 회색 배경색 (달력 아래쪽 회색 영역)
     width: "100%", // 전체 너비 사용
     paddingHorizontal: 16,
     paddingTop: 24,
@@ -586,7 +629,7 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   dateInfo: {
-    color: "#000",
+    color: "#FFF",
     fontSize: 20,
     lineHeight: 20 * 1.2,
     fontWeight: 600,

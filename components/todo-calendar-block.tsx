@@ -9,7 +9,7 @@ export default function TodoCalendarBlock({ text }: TodoCalendarBlockProps) {
     <View
       style={[
         styles.todoBlock,
-        { backgroundColor: text === "" ? "#FFF" : "#FDBEAD" },
+        { backgroundColor: text === "" ? "#434343" : "#FDBEAD" },
       ]}
     >
       <Text style={styles.todoText}>{text}</Text>

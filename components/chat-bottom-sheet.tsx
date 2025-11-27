@@ -67,7 +67,6 @@ export default function ChatBottomSheet({ onAddTodo }: ChatBottomSheetProps) {
   const sheetHeight = useSharedValue(80); // 초기값을 쿼리 인풋 높이로 설정
   const startY = useSharedValue(0);
   const queryInputTranslateY = useSharedValue(0); // 쿼리 인풋의 translateY 값
-  const originalSheetHeight = useSharedValue(80); // 키보드가 올라오기 전의 원래 높이 저장
 
   // SCREEN_HEIGHT가 처음 설정될 때 초기 위치 업데이트
   useEffect(() => {
@@ -93,23 +92,8 @@ export default function ChatBottomSheet({ onAddTodo }: ChatBottomSheetProps) {
   // 키보드 이벤트 처리
   useEffect(() => {
     const keyboardWillShow = Keyboard.addListener("keyboardWillShow", (e) => {
-      const keyboardHeight = e.endCoordinates.height;
-      const minHeight = queryInputHeightShared.value;
-      const currentHeight = sheetHeight.value;
-
-      // 현재 높이가 최소 사이즈인지 확인 (약간의 여유를 둠)
-      const isMinSize = Math.abs(currentHeight - minHeight) < 10;
-
-      if (isMinSize) {
-        // 최소 사이즈일 때는 원래 높이를 저장하고 챗바텀시트 높이를 키보드 높이만큼 늘림
-        originalSheetHeight.value = currentHeight;
-        sheetHeight.value = withTiming(currentHeight + keyboardHeight, {
-          duration: e.duration || 250,
-        });
-      }
-
-      // 키보드 높이만큼 쿼리 인풋을 위로 이동
-      queryInputTranslateY.value = withTiming(-keyboardHeight, {
+      // 키보드 높이만큼 쿼리 인풋만 위로 이동
+      queryInputTranslateY.value = withTiming(-e.endCoordinates.height, {
         duration: e.duration || 250,
       });
     });
@@ -118,36 +102,10 @@ export default function ChatBottomSheet({ onAddTodo }: ChatBottomSheetProps) {
       queryInputTranslateY.value = withTiming(0, {
         duration: e.duration || 250,
       });
-
-      // 최소 사이즈였으면 원래 높이로 복원
-      const minHeight = queryInputHeightShared.value;
-      const currentHeight = sheetHeight.value;
-      const isMinSize = Math.abs(originalSheetHeight.value - minHeight) < 10;
-
-      if (isMinSize && originalSheetHeight.value > 0) {
-        sheetHeight.value = withTiming(originalSheetHeight.value, {
-          duration: e.duration || 250,
-        });
-      }
     });
     const keyboardDidShow = Keyboard.addListener("keyboardDidShow", (e) => {
-      const keyboardHeight = e.endCoordinates.height;
-      const minHeight = queryInputHeightShared.value;
-      const currentHeight = sheetHeight.value;
-
-      // 현재 높이가 최소 사이즈인지 확인
-      const isMinSize = Math.abs(currentHeight - minHeight) < 10;
-
-      if (isMinSize) {
-        // 최소 사이즈일 때는 원래 높이를 저장하고 챗바텀시트 높이를 키보드 높이만큼 늘림
-        originalSheetHeight.value = currentHeight;
-        sheetHeight.value = withTiming(currentHeight + keyboardHeight, {
-          duration: 250,
-        });
-      }
-
       // Android용
-      queryInputTranslateY.value = withTiming(-keyboardHeight, {
+      queryInputTranslateY.value = withTiming(-e.endCoordinates.height, {
         duration: 250,
       });
     });
@@ -156,16 +114,6 @@ export default function ChatBottomSheet({ onAddTodo }: ChatBottomSheetProps) {
       queryInputTranslateY.value = withTiming(0, {
         duration: 250,
       });
-
-      // 최소 사이즈였으면 원래 높이로 복원
-      const minHeight = queryInputHeightShared.value;
-      const isMinSize = Math.abs(originalSheetHeight.value - minHeight) < 10;
-
-      if (isMinSize && originalSheetHeight.value > 0) {
-        sheetHeight.value = withTiming(originalSheetHeight.value, {
-          duration: 250,
-        });
-      }
     });
 
     return () => {
@@ -178,7 +126,6 @@ export default function ChatBottomSheet({ onAddTodo }: ChatBottomSheetProps) {
     queryInputTranslateY,
     queryInputHeightShared,
     sheetHeight,
-    originalSheetHeight,
   ]);
 
   const panGesture = Gesture.Pan()

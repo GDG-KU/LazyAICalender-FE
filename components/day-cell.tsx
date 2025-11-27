@@ -42,7 +42,6 @@ export default function DayCell({
       onDateClick(clickedDate);
     }
   };
-
   // 선택된 날짜 여부
   const isSelected =
     selectedDate &&
@@ -139,7 +138,6 @@ export default function DayCell({
     </Pressable>
   );
 }
-
 const styles = StyleSheet.create({
   dayCellPressable: {
     width: "14.28%", // 100% / 7
@@ -150,7 +148,6 @@ const styles = StyleSheet.create({
     borderTopColor: "#D9D9D9",
     paddingHorizontal: 2,
   },
-
   dayContent: {
     flex: 1, // 셀 전체 높이를 사용
     width: "100%",
@@ -173,14 +170,12 @@ const styles = StyleSheet.create({
   todayText: {
     color: "white",
   },
-
   selectedContainer: {
     backgroundColor: "#000000",
   },
   selectedText: {
     color: "white",
   },
-
   dayText: {
     fontSize: 11,
     lineHeight: 11 * 1.4,

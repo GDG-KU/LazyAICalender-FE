@@ -1,10 +1,13 @@
 import SettingIcon from "@/assets/icons/setting-icon.svg";
+import ViewConvertIcon from "@/assets/icons/view-convert-icon.svg";
 import CategoryTodoList from "@/components/category-todo-list";
 import DayCell from "@/components/day-cell";
-import QueryInput from "@/components/query-input";
+// query-input을 여기서 안 쓰고 chat-bottom-sheet.tsx에서 사용함
+// import QueryInput from "@/components/query-input";
 import { TodoItem } from "@/components/todo-info-block";
-// import ViewConvertButton from "@/components/view-convert-button";
-import ViewConvertIcon from "@/assets/icons/view-convert-icon.svg";
+import React, { useRef, useState } from "react";
+
+import ChatBottomSheet from "@/components/chat-bottom-sheet";
 import TodoActionSheetModal from "@/components/todo-action-sheet-modal";
 import TodoDeleteConfirmModal from "@/components/todo-delete-confirm-modal";
 import React, { useRef, useState } from "react";
@@ -141,10 +144,10 @@ export default function Calendar() {
   const toggleTodo = (id: string) => {
     const dateKey = DateKey(selectedDate); // 선택된 날짜를 키로 변환
 
-    setTodosByDate((prevTodosByDate) => ({
+    setTodosByDate((prevTodosByDate: Record<string, TodoItem[]>) => ({
       ...prevTodosByDate,
       [dateKey]:
-        prevTodosByDate[dateKey]?.map((todo) =>
+        prevTodosByDate[dateKey]?.map((todo: TodoItem) =>
           // 클릭된 투두의 id와 일치하는 경우에만 completed 상태를 반대로 변경
           todo.id === id ? { ...todo, completed: !todo.completed } : todo
         ) || [], // 해당 날짜에 투두가 없으면 빈 배열 반환
@@ -177,12 +180,12 @@ export default function Calendar() {
     if (!selectedTodoId) return;
     const dateKey = DateKey(selectedDate);
     const original = (todosByDate[dateKey] || []).find(
-      (t) => t.id === selectedTodoId
+      (t: TodoItem) => t.id === selectedTodoId
     );
     if (!original) return;
 
     const copy: TodoItem = { ...original, id: genId() };
-    setTodosByDate((prev) => ({
+    setTodosByDate((prev: Record<string, TodoItem[]>) => ({
       ...prev,
       [dateKey]: [...(prev[dateKey] || []), copy],
     }));
@@ -202,7 +205,7 @@ export default function Calendar() {
       category: "기타", // 기본 카테고리
     };
 
-    setTodosByDate((prev) => ({
+    setTodosByDate((prev: Record<string, TodoItem[]>) => ({
       ...prev,
       [dateKey]: [...(prev[dateKey] || []), newTodo],
     }));
@@ -212,9 +215,10 @@ export default function Calendar() {
   const deleteTodo = (id: string) => {
     const dateKey = DateKey(selectedDate);
 
-    setTodosByDate((prev) => ({
+    setTodosByDate((prev: Record<string, TodoItem[]>) => ({
       ...prev,
-      [dateKey]: prev[dateKey]?.filter((todo) => todo.id !== id) || [],
+      [dateKey]:
+        prev[dateKey]?.filter((todo: TodoItem) => todo.id !== id) || [],
     }));
   };
 
@@ -294,7 +298,6 @@ export default function Calendar() {
       const dayKey = DateKey(prevMonthDate);
       // 3. 해당 날짜의 할 일 배열 조회 (배열이 없으면 빈 배열 [] 반환)
       const todos = todosByDate[dayKey] || []; // <--- todos 배열 자체를 가져옵니다.
-
       days.push(
         <DayCell
           key={`prev-${i}`}
@@ -317,7 +320,6 @@ export default function Calendar() {
       const dayKey = DateKey(currentDate);
       // 3. 해당 날짜의 할 일 배열 조회
       const todos = todosByDate[dayKey] || []; // <--- todos 배열 자체를 가져옵니다.
-
       const today = new Date();
       const isToday =
         i === today.getDate() &&
@@ -349,7 +351,6 @@ export default function Calendar() {
         const dayKey = DateKey(nextMonthDate);
         // 3. 해당 날짜의 할 일 배열 조회
         const todos = todosByDate[dayKey] || []; // <--- todos 배열 자체를 가져옵니다.
-
         days.push(
           <DayCell
             key={`next-${i}`}
@@ -394,11 +395,9 @@ export default function Calendar() {
         <View style={styles.calendarWrapper}>
           <View style={styles.header}>
             {/* <View style={styles.monthYearContainer}> */}
-            {/* <ViewConvertButton /> */}
             <ViewConvertIcon />
             <Text style={styles.monthText}>{currentMonthName}</Text>
             {/* </View> */}
-            {/* <SettingButton /> */}
             <SettingIcon />
           </View>
           <FlatList
@@ -410,7 +409,7 @@ export default function Calendar() {
             // initialScrollIndex: 현재 월 기준으로 초기 달이 보이도록 설정
             initialScrollIndex={INITIAL_INDEX}
             // getItemLayout: 각 달의 달력 가로 길이는 모두 동일하므로 미리 계산하여 계산량 줄임
-            getItemLayout={(_, index) => ({
+            getItemLayout={(_: any, index: number) => ({
               length: screenWidth,
               offset: screenWidth * index,
               index,
@@ -421,9 +420,9 @@ export default function Calendar() {
             // viewabilityConfig: item이 언제 viewable하다고 결정할 지 정하는 부분
             // 횡스크롤하여 50% 이상 보일 때 'viewable'하다고 설정
             viewabilityConfig={{ viewAreaCoveragePercentThreshold: 50 }}
-            keyExtractor={(_, index) => index.toString()}
+            keyExtractor={(_: any, index: number) => index.toString()}
             // renderItem: index 변화 시 실제 보일 내용을 렌더링하는 부분
-            renderItem={({ index }) => {
+            renderItem={({ index }: { index: number }) => {
               const date = getDateFromIndex(index);
               return (
                 <View style={{ width: screenWidth }}>
@@ -447,9 +446,10 @@ export default function Calendar() {
             onLongPressTodo={openActionSheet} // 길게 클릭 시 시트 오픈
           />
         </View>
+        {/* 원래는 QueryInput을 index.tsx에 넣었는데 이를 modal로 옮김 */}
         {/* <QueryInput onAddTodo={addTodo} /> */}
+        <ChatBottomSheet onAddTodo={addTodo} />
       </SafeAreaView>
-      <QueryInput onAddTodo={addTodo} />
       {/* --- 하단 액션 시트: 삭제 / 복사 / 취소 --- */}
       <TodoActionSheetModal
         visible={actionSheetVisible}

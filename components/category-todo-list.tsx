@@ -3,14 +3,14 @@ import React from "react";
 // React Native의 UI 컴포넌트들 import
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 // 투두 관련 컴포넌트와 타입 import
-import TodoBlock, { TodoItem } from "./todo-block";
+import TodoInfoBlock, { TodoItem } from "./todo-info-block";
 
 // ===== CategoryTodoList 컴포넌트 Props 타입 정의 =====
 // CategoryTodoList 컴포넌트가 부모 컴포넌트로부터 받을 데이터의 구조를 정의
 interface CategoryTodoListProps {
   todos: TodoItem[]; // 표시할 투두 배열
   onToggleTodo: (id: string) => void; // 투두 완료 상태 토글 함수
-  onDeleteTodo?: (id: string) => void;     // 투두 삭제 함수
+  onDeleteTodo?: (id: string) => void; // 투두 삭제 함수
   onLongPressTodo?: (id: string) => void; // 투두 길게 클릭 시 함수
 }
 
@@ -64,12 +64,12 @@ export default function CategoryTodoList({
         <Text style={styles.categoryTitle}>{category}</Text>
         {/* 해당 카테고리의 투두들 */}
         {categoryTodos.map((todo) => (
-          <TodoBlock 
-            key={todo.id} 
-            todo={todo} 
+          <TodoInfoBlock
+            key={todo.id}
+            todo={todo}
             onToggleTodo={onToggleTodo}
             onLongPressTodo={onLongPressTodo}
-           />
+          />
         ))}
       </View>
     ));

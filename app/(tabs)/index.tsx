@@ -1,12 +1,13 @@
-import SettingButton from "@/assets/icons/setting-icon.svg";
-import ViewConvertButton from "@/assets/icons/view-convert-icon.svg";
+import SettingIcon from "@/assets/icons/setting-icon.svg";
+import ViewConvertIcon from "@/assets/icons/view-convert-icon.svg";
 import CategoryTodoList from "@/components/category-todo-list";
 import DayCell from "@/components/day-cell";
-import { TodoItem } from "@/components/todo-block";
+// query-input을 여기서 안 쓰고 chat-bottom-sheet.tsx에서 사용함
+// import QueryInput from "@/components/query-input";
+import { TodoItem } from "@/components/todo-info-block";
 import React, { useRef, useState } from "react";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import ChatBottomSheet from "@/components/ChatBottomSheet";
+import ChatBottomSheet from "@/components/chat-bottom-sheet";
 import TodoActionSheetModal from "@/components/todo-action-sheet-modal";
 import TodoDeleteConfirmModal from "@/components/todo-delete-confirm-modal";
 import {
@@ -18,7 +19,11 @@ import {
   ViewToken,
 } from "react-native";
 import "react-native-get-random-values";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaProvider,
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 // import { v4 as uuidv4 } from "uuid";
 
 const screenWidth = Dimensions.get("window").width;
@@ -73,6 +78,7 @@ export default function Calendar() {
   const [todosByDate, setTodosByDate] = useState<Record<string, TodoItem[]>>({
     // 오늘 날짜의 샘플 투두들
     [todayKey]: [
+      // todayKey의 형식: 2025-11-21의 형식
       {
         id: "1", // 투두의 고유 식별자
         text: "프로젝트 회의 준비", // 투두 내용
@@ -269,7 +275,10 @@ export default function Calendar() {
   const currentMonthName = monthNames[currentMonthDate.getMonth()];
 
   // 달력 렌더링
-  const renderCalendar = (date: Date) => {
+  const renderCalendar = (
+    date: Date,
+    todosByDate: Record<string, TodoItem[]>
+  ) => {
     // console.log(currentMonthIndex);
     const year = date.getFullYear();
     const month = date.getMonth();
@@ -284,6 +293,11 @@ export default function Calendar() {
 
     // 이전 달의 날짜 component 추가
     for (let i = firstDay; i > 0; i--) {
+      const prevMonthDate = new Date(year, month, i - firstDay);
+      // 2. 키 생성
+      const dayKey = DateKey(prevMonthDate);
+      // 3. 해당 날짜의 할 일 배열 조회 (배열이 없으면 빈 배열 [] 반환)
+      const todos = todosByDate[dayKey] || []; // <--- todos 배열 자체를 가져옵니다.
       days.push(
         <DayCell
           key={`prev-${i}`}
@@ -294,12 +308,18 @@ export default function Calendar() {
           onDateClick={handleDateClick} // 날짜 클릭 핸들러 전달
           selectedDate={selectedDate} // 선택된 날짜 전달
           calendarDate={calendarDate} // 달력 날짜 전달
+          todos={todos}
         />
       );
     }
 
     // 현재 달 날짜 component 추가
     for (let i = 1; i <= daysInMonth; i++) {
+      const currentDate = new Date(year, month, i);
+      // 2. 키 생성
+      const dayKey = DateKey(currentDate);
+      // 3. 해당 날짜의 할 일 배열 조회
+      const todos = todosByDate[dayKey] || []; // <--- todos 배열 자체를 가져옵니다.
       const today = new Date();
       const isToday =
         i === today.getDate() &&
@@ -316,6 +336,7 @@ export default function Calendar() {
           onDateClick={handleDateClick} // 날짜 클릭 핸들러 전달
           selectedDate={selectedDate} // 선택된 날짜 전달
           calendarDate={calendarDate} // 달력 날짜 전달
+          todos={todos}
         />
       );
     }
@@ -325,6 +346,11 @@ export default function Calendar() {
       // 이번 달이 토요일로 끝나지 않으면
       const trailingDays = 6 - lastDay;
       for (let i = 1; i <= trailingDays; i++) {
+        const nextMonthDate = new Date(year, month + 1, i);
+        // 2. 키 생성
+        const dayKey = DateKey(nextMonthDate);
+        // 3. 해당 날짜의 할 일 배열 조회
+        const todos = todosByDate[dayKey] || []; // <--- todos 배열 자체를 가져옵니다.
         days.push(
           <DayCell
             key={`next-${i}`}
@@ -335,6 +361,7 @@ export default function Calendar() {
             onDateClick={handleDateClick} // 날짜 클릭 핸들러 전달
             selectedDate={selectedDate} // 선택된 날짜 전달
             calendarDate={calendarDate} // 달력 날짜 전달
+            todos={todos}
           />
         );
       }
@@ -368,10 +395,10 @@ export default function Calendar() {
         <View style={styles.calendarWrapper}>
           <View style={styles.header}>
             {/* <View style={styles.monthYearContainer}> */}
-            <ViewConvertButton />
+            <ViewConvertIcon />
             <Text style={styles.monthText}>{currentMonthName}</Text>
             {/* </View> */}
-            <SettingButton />
+            <SettingIcon />
           </View>
           <FlatList
             data={Array.from({ length: 60 })}
@@ -399,7 +426,7 @@ export default function Calendar() {
               const date = getDateFromIndex(index);
               return (
                 <View style={{ width: screenWidth }}>
-                  {renderCalendar(date)}
+                  {renderCalendar(date, todosByDate)}
                 </View>
               );
             }}
@@ -419,6 +446,8 @@ export default function Calendar() {
             onLongPressTodo={openActionSheet} // 길게 클릭 시 시트 오픈
           />
         </View>
+        {/* 원래는 QueryInput을 index.tsx에 넣었는데 이를 modal로 옮김 */}
+        {/* <QueryInput onAddTodo={addTodo} /> */}
         <ChatBottomSheet onAddTodo={addTodo} />
       </SafeAreaView>
       {/* --- 하단 액션 시트: 삭제 / 복사 / 취소 --- */}
@@ -452,7 +481,7 @@ const styles = StyleSheet.create({
   // calendarWrapper : todoContainer = 393: 386
   calendarWrapper: {
     // 월 표시와 달력 칸을 합쳐 비율 6:7로 결정
-    flex: 393,
+    flex: 500,
     width: "100%",
   },
   card: {

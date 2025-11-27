@@ -11,6 +11,8 @@ export interface TodoItem {
   completed: boolean; // 완료 여부 (true = 완료됨, false = 미완료)
   category: string; // 카테고리 정보 (예: "업무", "개인", "건강" 등)
   time?: string; // 예정 시간 (예: "오후 5시") - ?는 선택적 속성임을 의미
+  isTodo?: boolean; // 투두인지 일반 일정인지 구분 (기본값: true)
+
 }
 
 // ===== TodoBlock 컴포넌트 Props 타입 정의 =====
@@ -29,39 +31,56 @@ export default function TodoBlock({
   onToggleTodo,
   onLongPressTodo,
 }: TodoBlockProps) {
+  // isTodo === false 면 일반 일정, 그 외(undefined/true)는 투두로 취급
+  const isTodo = todo.isTodo !== false;
+
   return (
-    <Pressable
-      onLongPress={() => onLongPressTodo?.(todo.id)}
-      delayLongPress={300} // 선택: 길게 누르기 지연 (ms)
-    >
-      <View style={styles.todoBlock}>
-        {/* ===== 체크박스 영역 (터치 가능) ===== */}
-        <Pressable
-          style={[styles.checkbox, todo.completed && styles.checkedBox]}
-          onPress={() => onToggleTodo(todo.id)}
-        >
-          {todo.completed && <Text style={styles.checkmark}>✓</Text>}
-        </Pressable>
+    <View style={styles.row}>
+      {/* 전체 블럭 길게 누르기 -> 액션시트 등 */}
+      <Pressable
+        onLongPress={() => onLongPressTodo?.(todo.id)}
+        delayLongPress={300} // 선택: 길게 누르기 지연 (ms)
+      >
+        <View style={styles.todoBlock}>
+          {/* ===== 체크박스 영역 ===== */}
+          {isTodo && (
+            <Pressable
+              style={[styles.checkbox, todo.completed && styles.checkedBox]}
+              onPress={() => onToggleTodo?.(todo.id)}
+            >
+              {todo.completed && <Text style={styles.checkmark}>✓</Text>}
+            </Pressable>
+          )}
 
-        {/* ===== 투두 텍스트 영역 ===== */}
-        <View style={styles.todoInfoWrapper}>
-          <Text
-            style={[styles.todoText, todo.completed && styles.completedText]}
-          >
-            {todo.text}
-          </Text>
+          {/* ===== 투두 텍스트 영역 ===== */}
+          <View style={styles.todoInfoWrapper}>
+            <Text
+              style={[
+                styles.todoText,
+                // 완료선은 투두일 때만
+                todo.completed && isTodo && styles.completedText,
+              ]}
+            >
+              {todo.text}
+            </Text>
 
-          {/* ===== 시간 표시 영역 (조건부 렌더링) ===== */}
-          {todo.time && <Text style={styles.timeText}>{todo.time}</Text>}
+            {/* ===== 시간 표시 영역 (조건부 렌더링) ===== */}
+            {todo.time && <Text style={styles.timeText}>{todo.time}</Text>}
+          </View>
         </View>
-      </View>
-    </Pressable>
+      </Pressable>
+    </View>
   );
 }
 
 // ===== 스타일 정의 =====
 // StyleSheet.create를 사용하여 컴포넌트의 스타일을 정의
 const styles = StyleSheet.create({
+  // 정렬용
+  row: {
+    width: "100%",
+    marginBottom: 8,
+  },
   // ===== 투두 블록 전체 컨테이너 스타일 =====
   todoBlock: {
     width: "100%",

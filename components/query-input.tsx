@@ -1,15 +1,9 @@
 // components/QueryInput.tsx
 import React, { useState } from "react";
-import {
-  Keyboard,
-  Pressable,
-  StyleSheet,
-  TextInput,
-  View,
-} from "react-native";
+import { Keyboard, Pressable, StyleSheet, TextInput, View } from "react-native";
 
+import SendButton from "@/assets/icons/send-icon.svg";
 import { LinearGradient } from "expo-linear-gradient";
-import SendButton from "./send-icon";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface QueryInputProps {

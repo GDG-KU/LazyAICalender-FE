@@ -1,6 +1,6 @@
+import DeleteIcon from "@/assets/icons/delete-icon.svg";
 import React from "react";
 import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
-import DeleteIcon from "./delete-icon";
 interface TodoDeleteConfirmModalProps {
   // 모달 표시 여부
   visible: boolean;

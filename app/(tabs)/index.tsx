@@ -1,14 +1,14 @@
+import SettingButton from "@/assets/icons/setting-icon.svg";
+import ViewConvertButton from "@/assets/icons/view-convert-icon.svg";
 import CategoryTodoList from "@/components/category-todo-list";
 import DayCell from "@/components/day-cell";
-import SettingButton from "@/components/setting-icon";
 import { TodoItem } from "@/components/todo-block";
-import ViewConvertButton from "@/components/view-convert-button";
 import React, { useRef, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import ChatBottomSheet from "@/components/ChatBottomSheet";
 import TodoActionSheetModal from "@/components/todo-action-sheet-modal";
 import TodoDeleteConfirmModal from "@/components/todo-delete-confirm-modal";
-import ChatBottomSheet from "@/components/ChatBottomSheet";
 import {
   Dimensions,
   FlatList,
@@ -211,7 +211,8 @@ export default function Calendar() {
 
     setTodosByDate((prev: Record<string, TodoItem[]>) => ({
       ...prev,
-      [dateKey]: prev[dateKey]?.filter((todo: TodoItem) => todo.id !== id) || [],
+      [dateKey]:
+        prev[dateKey]?.filter((todo: TodoItem) => todo.id !== id) || [],
     }));
   };
 

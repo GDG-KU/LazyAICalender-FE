@@ -101,13 +101,16 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     alignItems: "stretch",
     gap: 8,
+    backgroundColor: "#8B69F8",
+    padding: 16,
+    borderRadius: 16,
   },
   // ===== 카테고리 제목 스타일 =====
   categoryTitle: {
     fontSize: 14, // 폰트 크기 (투두 텍스트보다 크게)
     lineHeight: 14 * 1.2,
     fontWeight: 500,
-    color: "#000",
+    color: "#FFF",
   },
   // ===== 빈 상태 컨테이너 스타일 =====
   emptyStateContainer: {

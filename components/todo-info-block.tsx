@@ -1,4 +1,5 @@
 // React 라이브러리 import (JSX 사용을 위해 필요)
+import CheckMarkIcon from "@/assets/icons/check-mark-icon.svg";
 import React from "react";
 // React Native의 UI 컴포넌트들 import
 import { Pressable, StyleSheet, Text, View } from "react-native";
@@ -29,6 +30,11 @@ export default function TodoInfoBlock({
   onToggleTodo,
   onLongPressTodo,
 }: TodoBlockProps) {
+  // const checkMarkColor = todo.completed
+  //   ? "rgba(139, 105, 284, 1)"
+  //   : "rgba(139, 105, 284, 0.6)";
+  // const checkMarkColor = "rgba(139, 105, 284, 1)";
+
   return (
     <Pressable
       onLongPress={() => onLongPressTodo?.(todo.id)}
@@ -40,7 +46,14 @@ export default function TodoInfoBlock({
           style={[styles.checkbox, todo.completed && styles.checkedBox]}
           onPress={() => onToggleTodo(todo.id)}
         >
-          {todo.completed && <Text style={styles.checkmark}>✓</Text>}
+          {/* {todo.completed && <CheckMarkIcon fill={checkMarkColor} />} */}
+          <CheckMarkIcon
+            color={
+              todo.completed
+                ? "rgba(139, 105, 284, 1)"
+                : "rgba(255, 255, 255, 0.3)"
+            }
+          />
         </Pressable>
 
         {/* ===== 투두 텍스트 영역 ===== */}
@@ -67,16 +80,17 @@ const styles = StyleSheet.create({
     width: "100%",
     flexDirection: "row", // 자식 요소들(체크박스, 텍스트, 시간)을 가로로 배열
     alignItems: "center", // 자식 요소들을 세로 중앙 정렬
-    backgroundColor: "#FFF", // 밝은 회색 배경색 (투두 아이템의 배경)
+    backgroundColor: "rgba(255, 255, 255, 0.2)", // opacity를 별도로 설정해주면 해당 component와 모든 하위 component의 opacity에 영향을 미친다.
+    // 또한 child component에서 parent component의 opacity를 덮어쓸 수도 없기 때문에 나타나는 문제이다.
     height: 54,
     paddingHorizontal: 16, // 좌우 내부 여백 16px
     paddingVertical: 8, // 상하 내부 여백 12px
     // marginBottom: 8, // 아래쪽 외부 여백 8px (다음 투두와의 간격)
     // marginHorizontal: 16, // 좌우 외부 여백 16px (화면 가장자리와의 간격)
     gap: 12,
-    borderRadius: 4,
-    borderLeftWidth: 4,
-    borderLeftColor: "#AC95F5",
+    borderRadius: 8,
+    // borderLeftWidth: 4,
+    // borderLeftColor: "#AC95F5",
   },
   todoInfoWrapper: {
     alignItems: "center",
@@ -92,9 +106,9 @@ const styles = StyleSheet.create({
     width: 24, // 체크박스 너비 20px
     height: 24, // 체크박스 높이 20px
     borderRadius: 12, // 완전히 둥근 모양 (원형 체크박스)
-    borderWidth: 2, // 테두리 두께 2px
-    borderColor: "#E6E6E6", // 연한 회색 테두리 (미완료 상태)
-    backgroundColor: "white", // 배경색 흰색 (미완료 상태)
+    // borderWidth: 2, // 테두리 두께 2px
+    // borderColor: "#E6E6E6", // 연한 회색 테두리 (미완료 상태)
+    backgroundColor: "rgba(139, 105, 284, 0.6)",
     justifyContent: "center", // 체크마크를 가로 중앙 정렬
     alignItems: "center", // 체크마크를 세로 중앙 정렬
     // marginRight: 12, // 오른쪽 여백 12px (투두 텍스트와의 간격)
@@ -103,31 +117,31 @@ const styles = StyleSheet.create({
   },
   // ===== 완료된 체크박스 스타일 =====
   checkedBox: {
-    backgroundColor: "#AC95F5", // 진한 회색 배경 (완료 상태)
-    borderColor: "#AC95F5", // 진한 회색 테두리 (완료 상태)
+    backgroundColor: "#FFF", // 진한 회색 배경 (완료 상태)
+    // borderColor: "#AC95F5", // 진한 회색 테두리 (완료 상태)
   },
   // ===== 체크마크(✓) 텍스트 스타일 =====
-  checkmark: {
-    color: "white", // 흰색 텍스트 (진한 배경에 잘 보이도록)
-    fontSize: 12, // 폰트 크기 12px
-    fontWeight: "bold", // 굵은 글씨 (체크마크가 더 명확하게 보이도록)
-  },
+  // checkmark: {
+  //   color: "white", // 흰색 텍스트 (진한 배경에 잘 보이도록)
+  //   fontSize: 12, // 폰트 크기 12px
+  //   fontWeight: "bold", // 굵은 글씨 (체크마크가 더 명확하게 보이도록)
+  // },
   // ===== 투두 텍스트 스타일 =====
   todoText: {
     flex: 1, // 남은 공간을 모두 차지 (체크박스와 시간 사이의 공간)
     fontSize: 16, // 폰트 크기 16px
-    color: "#1F2937", // 진한 회색 텍스트 (가독성을 위한 색상)
+    color: "#FFF", // 진한 회색 텍스트 (가독성을 위한 색상)
     fontWeight: "500", // 중간 굵기 폰트 (적당한 두께)
   },
   // ===== 완료된 투두 텍스트 스타일 =====
   completedText: {
     textDecorationLine: "line-through", // 취소선 그리기 (완료된 투두임을 시각적으로 표시)
-    color: "#9CA3AF", // 연한 회색으로 변경 (완료된 투두는 흐리게 표시)
+    // color: "#9CA3AF", // 연한 회색으로 변경 (완료된 투두는 흐리게 표시)
   },
   // ===== 시간 텍스트 스타일 =====
   timeText: {
     fontSize: 14, // 폰트 크기 14px (투두 텍스트보다 작게)
-    color: "#9CA3AF", // 연한 회색 시간 텍스트 (보조 정보임을 나타냄)
+    color: "#FFF", // 연한 회색 시간 텍스트 (보조 정보임을 나타냄)
     fontWeight: "400", // 일반 굵기 폰트 (투두 텍스트보다 얇게)
   },
 });

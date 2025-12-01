@@ -1,18 +1,21 @@
+import AddTodoManuallyIcon from "@/assets/icons/add-todo-manually-icon.svg";
+import LeftArrowIcon from "@/assets/icons/left-arrow-icon.svg";
+import RightArrowIcon from "@/assets/icons/right-arrow-icon.svg";
 import SettingIcon from "@/assets/icons/setting-icon.svg";
 import ViewConvertIcon from "@/assets/icons/view-convert-icon.svg";
 import CategoryTodoList from "@/components/category-todo-list";
 import DayCell from "@/components/day-cell";
 // query-input을 여기서 안 쓰고 chat-bottom-sheet.tsx에서 사용함
 // import QueryInput from "@/components/query-input";
-import { TodoItem } from "@/components/todo-info-block";
-import React, { useRef, useState } from "react";
-
 import ChatBottomSheet from "@/components/chat-bottom-sheet";
 import TodoActionSheetModal from "@/components/todo-action-sheet-modal";
 import TodoDeleteConfirmModal from "@/components/todo-delete-confirm-modal";
+import { TodoItem } from "@/components/todo-info-block";
+import React, { useRef, useState } from "react";
 import {
   Dimensions,
   FlatList,
+  Pressable,
   StyleSheet,
   Text,
   View,
@@ -24,7 +27,6 @@ import {
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
-// import { v4 as uuidv4 } from "uuid";
 
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
@@ -85,21 +87,21 @@ export default function Calendar() {
         text: "프로젝트 회의 준비", // 투두 내용
         completed: false, // 완료 여부 (false = 미완료)
         category: "업무", // 카테고리 분류
-        time: "오후 2시", // 예정 시간 (선택사항)
+        time: "14:00", // 예정 시간 (선택사항)
       },
       {
         id: "6", // 투두의 고유 식별자
         text: "프로젝트 회의", // 투두 내용
         completed: false, // 완료 여부 (false = 미완료)
         category: "업무", // 카테고리 분류
-        time: "오후 2시", // 예정 시간 (선택사항)
+        time: "14:00", // 예정 시간 (선택사항)
       },
       {
         id: "2",
         text: "장보기",
         completed: true, // 완료된 투두 (체크박스에 체크됨)
         category: "개인",
-        time: "오후 5시",
+        time: "17:00",
       },
       {
         id: "3",
@@ -116,7 +118,7 @@ export default function Calendar() {
         text: "병원 예약",
         completed: false,
         category: "건강",
-        time: "오전 10시",
+        time: "10:00",
       },
       {
         id: "5",
@@ -126,6 +128,19 @@ export default function Calendar() {
       },
     ],
   });
+
+  const flatListRef = useRef<FlatList>(null);
+  const goToPrevMonth = () => {
+    const targetIndex = currentMonthIndex - 1;
+    flatListRef.current?.scrollToIndex({ index: targetIndex, animated: true });
+    setCurrentMonthIndex(targetIndex);
+  };
+
+  const goToNextMonth = () => {
+    const targetIndex = currentMonthIndex + 1;
+    flatListRef.current?.scrollToIndex({ index: targetIndex, animated: true });
+    setCurrentMonthIndex(targetIndex);
+  };
 
   // --- 액션 시트 & 확인 모달 상태 ---
   const [actionSheetVisible, setActionSheetVisible] = useState(false);
@@ -404,19 +419,25 @@ export default function Calendar() {
           // onLayout={(e) => setWrapperWidth(e.nativeEvent.layout.width)}
         >
           <View style={styles.header}>
-            {/* <View style={styles.monthYearContainer}> */}
             <View style={styles.headerIconsContainer}>
-              <ViewConvertIcon />
+              <ViewConvertIcon color="#FFF" />
             </View>
-            <View style={styles.monthTextContainer}>
+            <View style={styles.monthInfoContainer}>
+              <Pressable onPress={goToPrevMonth} style={styles.arrowContainer}>
+                <LeftArrowIcon />
+              </Pressable>
               <Text style={styles.monthText}>{currentMonthName}</Text>
+              <Pressable onPress={goToNextMonth} style={styles.arrowContainer}>
+                <RightArrowIcon />
+              </Pressable>
             </View>
             {/* </View> */}
             <View style={styles.headerIconsContainer}>
-              <SettingIcon />
+              <SettingIcon color="#FFF" />
             </View>
           </View>
           <FlatList
+            ref={flatListRef}
             data={Array.from({ length: 60 })}
             // horizontal: 횡 방향으로의 list 나열
             horizontal
@@ -425,11 +446,23 @@ export default function Calendar() {
             // initialScrollIndex: 현재 월 기준으로 초기 달이 보이도록 설정
             initialScrollIndex={INITIAL_INDEX}
             // getItemLayout: 각 달의 달력 가로 길이는 모두 동일하므로 미리 계산하여 계산량 줄임
-            getItemLayout={(_: any, index: number) => ({
-              length: screenWidth,
-              offset: screenWidth * index,
+            // getItemLayout={(_: any, index: number) => ({
+            //   length: screenWidth,
+            //   offset: screenWidth * index,
+            //   index,
+            // })}
+
+            // 여기부터
+            getItemLayout={(_, index) => ({
+              length: wrapperWidth,
+              offset: wrapperWidth * index,
               index,
             })}
+            onLayout={(e) => {
+              const w = e.nativeEvent.layout.width;
+              setWrapperWidth(w);
+            }}
+            // 여기까지 수정해봄
             showsHorizontalScrollIndicator={false}
             // onViewableItemsChanged: 횡 스크롤로 보여야 하는 index가 바뀔 경우 trigger됨
             onViewableItemsChanged={onViewableItemsChanged}
@@ -451,11 +484,14 @@ export default function Calendar() {
         </View>
         {/* ===== 투두 리스트 영역 ===== */}
         <View style={styles.todoContainer}>
-          <View style={styles.dateInfoContainer}>
+          <View style={styles.todoHeaderContainer}>
             <Text style={styles.dateInfo}>
               {selectedDate.getDate()}일 {dayNamesKor[selectedDate.getDay()]}
               요일
             </Text>
+            <View style={styles.addTodoBtnContainer}>
+              <AddTodoManuallyIcon />
+            </View>
           </View>
           <CategoryTodoList
             todos={getTodosForSelectedDate()} // 선택된 날짜의 투두 전달
@@ -527,6 +563,7 @@ const styles = StyleSheet.create({
     // alignSelf: "center",
     // width: "100%",
     maxWidth: 600,
+    borderRadius: 16,
   },
   header: {
     flexDirection: "row",
@@ -536,30 +573,42 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   headerIconsContainer: {
-    height: 29,
-    width: 29,
-    borderRadius: 14.5,
+    height: 34,
+    width: 34,
+    borderRadius: 17,
     backgroundColor: "#5A5A5A",
     justifyContent: "center",
     alignItems: "center",
   },
-  monthYearContainer: {
+  monthInfoContainer: {
+    // height: "100%",
+    height: 34, // height: 100%를 주면 explict height를 가지지 않기 때문에 justifyContent를 줘도 monthText가 세로로 중앙 정렬되지 않는다
+    width: "32.49%",
+    backgroundColor: "#5A5A5A",
+    flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
+    borderRadius: 17,
+    paddingHorizontal: 6,
+    paddingVertical: 4,
   },
   monthText: {
     // width: 36,
-    height: 29,
+    // height: 29,
     fontSize: 24,
-    lineHeight: 24 * 1.2,
+    // lineHeight: 24 * 1.2,
     fontWeight: "600",
     color: "#FFF",
+    opacity: 0.32,
+    textAlignVertical: "center",
   },
-  monthTextContainer: {
-    height: "100%",
-    width: "32.49%",
-    backgroundColor: "#5A5A5A",
+  arrowContainer: {
+    height: 24,
+    width: 24,
+    justifyContent: "center",
     alignItems: "center",
-    borderRadius: 17,
+    color: "#FFF",
+    opacity: 0.2,
   },
   // yearText: {
   //   fontSize: 18,
@@ -622,17 +671,27 @@ const styles = StyleSheet.create({
     width: "100%", // 전체 너비 사용
     paddingHorizontal: 16,
     paddingTop: 24,
-  },
-  dateInfoContainer: {
-    flexDirection: "column",
-    alignItems: "flex-start",
     gap: 16,
+  },
+  todoHeaderContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    // gap: 16,
   },
   dateInfo: {
     color: "#FFF",
     fontSize: 20,
     lineHeight: 20 * 1.2,
     fontWeight: 600,
+  },
+  addTodoBtnContainer: {
+    height: 24,
+    width: 24,
+    borderRadius: 12,
+    backgroundColor: "#000",
+    justifyContent: "center",
+    alignItems: "center",
   },
   // bottomSafeArea: {
   //   backgroundColor: "#6b7280",
